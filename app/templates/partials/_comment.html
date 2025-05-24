@@ -1,0 +1,71 @@
+{# Macro or include for rendering a comment and its replies recursively #}
+{% macro render_comment(comment, post_id) %}
+  <li class="comment-item" id="comment-{{ comment.id }}">
+    <div class="comment-author">
+      <img src="{{ comment.user.avatar_url if comment.user.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ comment.user.username }} avatar" class="avatar-small">
+      <strong>{{ comment.user.username }}</strong>
+      <span class="comment-meta"> - {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+    </div>
+    <div class="comment-content">
+      <p>{{ comment.text_content }}</p>
+    </div>
+    <div class="comment-actions">
+      {% if g.user %}
+      <a href="#" class="reply-link" data-comment-id="{{ comment.id }}" data-username="{{ comment.user.username }}" data-form-target="reply-form-{{ comment.id }}">Reply</a>
+      <form action="{{ url_for('community.comment_on_post', post_id=post_id) }}" method="post" class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+          <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
+          <div>
+            <label for="text_content_{{ comment.id }}">Reply to {{ comment.user.username }}:</label>
+            <textarea name="text_content" id="text_content_{{ comment.id }}" rows="2" required></textarea>
+          </div>
+          <input type="submit" value="Post Reply">
+        </form>
+      {% endif %}
+    </div>
+
+    {% if comment.replies %}
+      <ul class="comment-thread replies">
+        {% for reply in comment.replies %}
+          {{ render_comment(reply, post_id) }} {# Recursive call #}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </li>
+{% endmacro %}
+
+{# Main entry point when including this partial #}
+<ul class="comment-thread">
+  {% for comment in comments %} {# Assumes 'comments' is the list of top-level comments #}
+    {{ render_comment(comment, post.id) }} {# post.id needs to be available in context #}
+  {% endfor %}
+</ul>
+
+<style>
+/* Styles specific to comments, can be moved to a main CSS file */
+.comment-thread { list-style: none; padding-left: 0; }
+.comment-thread.replies { padding-left: 20px; border-left: 2px solid #eee; margin-left: 10px; }
+.comment-item { 
+  background-color: #f9f9f9; 
+  border: 1px solid #eee; 
+  border-radius: 4px; 
+  padding: 10px; 
+  margin-top: 10px; 
+}
+.comment-author { font-weight: bold; margin-bottom: 5px; display: flex; align-items: center;}
+.comment-author .avatar-small { width: 25px; height: 25px; border-radius: 50%; margin-right: 8px; }
+.comment-meta { font-size: 0.8em; color: #888; margin-left: 5px;}
+.comment-content { margin-bottom: 8px; font-size: 0.95em; }
+.comment-actions { margin-top: 5px; }
+.reply-link { font-size: 0.9em; color: #337ab7; cursor: pointer; text-decoration: none; }
+.reply-link:hover { text-decoration: underline; }
+.reply-form { 
+    margin-left: 0; /* Replies forms are direct children now */
+    margin-top: 10px; 
+    padding:10px; 
+    background-color:#f0f0f0; 
+    border-radius:4px;
+}
+.reply-form textarea { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 3px; box-sizing: border-box; font-size:0.9em; }
+.reply-form input[type="submit"] { background-color: #6c757d; color: white; padding: 6px 12px; border:none; border-radius:3px; cursor:pointer; font-size:0.9em; }
+.reply-form input[type="submit"]:hover { background-color: #5a6268; }
+</style>

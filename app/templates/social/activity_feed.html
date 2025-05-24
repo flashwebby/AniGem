@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Friends' Activity{% endblock %}
+
+{% block header %}
+  <h1>What Your Friends Are Watching</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  .activity-feed-list { list-style: none; padding: 0; }
+  .activity-item { 
+    padding: 10px; 
+    border-bottom: 1px solid #eee; 
+    margin-bottom: 5px;
+    background-color: #fff;
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-user-avatar { width: 30px; height: 30px; border-radius: 50%; margin-right: 10px; vertical-align: middle;}
+  .activity-content .username { font-weight: bold; }
+  .activity-content .anime-title { font-style: italic; }
+  .activity-timestamp { font-size: 0.85em; color: #777; margin-left: 5px; }
+</style>
+
+{% if activities %}
+  <ul class="activity-feed-list">
+    {% for activity in activities %} {# Assuming activities is a list of WatchlistItem-like objects with user and anime details #}
+      <li class="activity-item">
+        <img src="{{ activity.user.avatar_url if activity.user.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ activity.user.username }} avatar" class="activity-user-avatar">
+        <span class="activity-content">
+          <a href="{{ url_for('user.profile', username=activity.user.username) }}" class="username">{{ activity.user.username }}</a>
+          {{ activity.status|replace('_', ' ') }} 
+          <a href="{{ url_for('anime.detail', anime_id=activity.anime.id) }}" class="anime-title">{{ activity.anime.title }}</a>.
+        </span>
+        <span class="activity-timestamp">({{ activity.added_at.strftime('%Y-%m-%d %H:%M') if activity.added_at }})</span>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No recent activity from your friends, or you haven't added any friends yet.</p>
+  <p>When your friends update their watchlists, their activity will appear here.</p>
+{% endif %}
+{% endblock %}

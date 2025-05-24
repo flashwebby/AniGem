@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Create New Subcommunity{% endblock %}
+
+{% block header %}
+  <h1>Create New Subcommunity</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+  .form-group input[type="text"],
+  .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  .form-group textarea { min-height: 100px; }
+</style>
+
+<form method="post">
+  <div class="form-group">
+    <label for="name">Subcommunity Name (e.g., ActionLovers, IsekaiFans)</label>
+    <input type="text" name="name" id="name" value="{{ request.form['name'] }}" required>
+    <small>No spaces or special characters other than hyphens/underscores usually. This will be part of the URL (e.g., /s/ActionLovers).</small>
+  </div>
+
+  <div class="form-group">
+    <label for="description">Description</label>
+    <textarea name="description" id="description">{{ request.form['description'] }}</textarea>
+    <small>A brief description of what your subcommunity is about.</small>
+  </div>
+
+  <input type="submit" value="Create Subcommunity" class="button">
+</form>
+{% endblock %}

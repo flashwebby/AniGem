@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-g">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}My Anime Platform{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {# In a real app, you'd use Bootstrap or another CSS framework #}
+    <style>
+      body { font-family: sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; color: #333; }
+      nav { background-color: #333; padding: 10px; margin-bottom: 20px; }
+      nav ul { list-style-type: none; padding: 0; margin: 0; display: flex; align-items: center; }
+      nav ul li { margin-right: 15px; }
+      nav ul li a { color: white; text-decoration: none; }
+      nav ul li a:hover { text-decoration: underline; }
+      .container { background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+      .flash { padding: 10px; margin-bottom: 10px; border-radius: 3px; }
+      .flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+      .flash.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+      label { display: block; margin-bottom: 5px; font-weight: bold; }
+      input[type="text"], input[type="email"], input[type="password"] {
+        width: calc(100% - 22px);
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+      }
+      input[type="submit"] {
+        background-color: #5cb85c;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      input[type="submit"]:hover { background-color: #4cae4c; }
+      h1, h2 { color: #333; }
+      .nav-notifications .badge, #unread-dm-count { /* Combined badge style */
+        background-color: red; color: white; 
+        border-radius: 50%; padding: 2px 6px; 
+        font-size: 0.7em; vertical-align: top; margin-left: 3px;
+      }
+      .nav-notifications .badge:empty, #unread-dm-count:empty { display: none; }
+    </style>
+    {% block styles %}{% endblock %}
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('hello') }}">Home</a></li>
+        <li><a href="{{ url_for('anime.list_anime') }}">Anime</a></li>
+        <li><a href="{{ url_for('community.home') }}">Community</a></li> 
+        {% if g.user %}
+          <li><span>Hi, {{ g.user.username }}!</span></li>
+          <li class="nav-notifications">
+            <a href="{{ url_for('user_activity.notifications_page') }}">
+              Notifications <span class="badge" id="unread-notifications-count">{{ unread_notification_count if unread_notification_count > 0 else '' }}</span>
+            </a>
+          </li>
+          <li><a href="{{ url_for('social.friends_list_page') }}">Friends</a></li>
+          <li><a href="{{ url_for('social.messages_home') }}">
+                Messages <span class="badge" id="unread-dm-count">{{ unread_dm_count if unread_dm_count > 0 else '' }}</span>
+              </a>
+          </li>
+          <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+          <li><a href="{{ url_for('user.profile', username=g.user.username) }}">Profile</a></li>
+        {% else %}
+          <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+          <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    <section class="container">
+      <header>
+        {% block header %}{% endblock %}
+      </header>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </section>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script> {# Ensure main.js is loaded #}
+    {% block scripts %}{% endblock %} {# Allow pages to add their own scripts #}
+  </body>
+</html>

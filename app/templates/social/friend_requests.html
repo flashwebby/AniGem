@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Friend Requests{% endblock %}
+
+{% block header %}
+  <h1>Manage Friend Requests</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  .requests-container { display: flex; gap: 30px; flex-wrap: wrap; }
+  .requests-column { flex: 1; min-width: 300px; }
+  .requests-column h2 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+  .request-item { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 10px; 
+    border: 1px solid #eee; 
+    border-radius: 4px; 
+    margin-bottom: 10px;
+    background-color: #fff;
+  }
+  .request-user-info { display: flex; align-items: center; }
+  .request-user-info img.avatar-small { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+  .request-actions form { display: inline-block; margin-left: 5px; }
+</style>
+
+<div class="requests-container">
+  <section class="requests-column">
+    <h2>Incoming Requests</h2>
+    {% if incoming_requests %}
+      <ul class="list-unstyled">
+        {% for req in incoming_requests %}
+          {# Assuming friend_id on the Friendship object is the ID of the user who sent the request #}
+          {# This relies on get_pending_friend_requests in db.py correctly identifying incoming ones #}
+          {% if req.friend_id != g.user.id %} {# Basic check, ideally db.py provides cleaner separation #}
+            <li class="request-item">
+              <div class="request-user-info">
+                <img src="{{ req.friend_avatar_url if req.friend_avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ req.friend_username }} avatar" class="avatar-small">
+                <a href="{{ url_for('user.profile', username=req.friend_username) }}">{{ req.friend_username }}</a>
+              </div>
+              <div class="request-actions">
+                <form action="{{ url_for('social.accept_request_route', target_user_id=req.friend_id) }}" method="post">
+                  <button type="submit" class="button-sm button-success">Accept</button>
+                </form>
+                <form action="{{ url_for('social.reject_request_route', target_user_id=req.friend_id) }}" method="post">
+                  <button type="submit" class="button-sm button-danger">Reject</button>
+                </form>
+              </div>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+      {% if not incoming_requests or incoming_requests|selectattr('friend_id', '!=', g.user.id)|list|length == 0 %}
+         <p>No new incoming friend requests.</p>
+      {% endif %}
+    {% else %}
+      <p>No incoming friend requests.</p>
+    {% endif %}
+  </section>
+
+  <section class="requests-column">
+    <h2>Sent Requests</h2>
+    {% if sent_requests %}
+      <ul class="list-unstyled">
+        {% for req in sent_requests %}
+          {# Assuming friend_id on the Friendship object is the ID of the user to whom request was sent #}
+          {# This relies on get_sent_friend_requests in db.py correctly identifying outgoing ones #}
+           {% if req.friend_id != g.user.id %} {# Basic check for sent requests #}
+            <li class="request-item">
+              <div class="request-user-info">
+                <img src="{{ req.friend_avatar_url if req.friend_avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ req.friend_username }} avatar" class="avatar-small">
+                <span>Waiting for <a href="{{ url_for('user.profile', username=req.friend_username) }}">{{ req.friend_username }}</a> to respond.</span>
+              </div>
+              <div class="request-actions">
+                {# TODO: Implement Cancel Friend Request Route if desired #}
+                {# <form action="{{ url_for('social.cancel_request_route', target_user_id=req.friend_id) }}" method="post"> #}
+                {#   <button type="submit" class="button-sm button-warning">Cancel</button> #}
+                {# </form> #}
+                <small class="text-muted">Pending</small>
+              </div>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+       {% if not sent_requests or sent_requests|selectattr('friend_id', '!=', g.user.id)|list|length == 0 %}
+         <p>You haven't sent any friend requests that are still pending.</p>
+      {% endif %}
+    {% else %}
+      <p>No sent friend requests pending.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

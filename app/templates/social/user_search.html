@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}User Search{% endblock %}
+
+{% block header %}
+  <h1>Search for Users</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  .search-form { margin-bottom: 20px; }
+  .search-results-list { list-style: none; padding: 0; }
+  .user-search-item { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 10px; 
+    border: 1px solid #eee; 
+    border-radius: 4px; 
+    margin-bottom: 10px;
+    background-color: #fff;
+  }
+  .user-info { display: flex; align-items: center; }
+  .user-info img.avatar-small { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+  .user-actions form { display: inline-block; margin-left: 5px;}
+</style>
+
+<form method="post" class="search-form">
+  <div class="form-group">
+    <label for="username_query">Enter Username:</label>
+    <input type="text" name="username_query" id="username_query" value="{{ query if query else '' }}" required>
+  </div>
+  <button type="submit" class="button">Search</button>
+</form>
+
+{% if search_results %}
+  <h2>Search Results for "{{ query }}"</h2>
+  <ul class="search-results-list">
+    {% for user_result in search_results %}
+      <li class="user-search-item">
+        <div class="user-info">
+          <img src="{{ user_result.avatar_url if user_result.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ user_result.username }} avatar" class="avatar-small">
+          <a href="{{ url_for('user.profile', username=user_result.username) }}">{{ user_result.username }}</a>
+        </div>
+        <div class="user-actions">
+          {% if user_result.id != g.user.id %} {# Can't interact with self #}
+            {% if user_result.friendship_status == 'accepted' %}
+              <span class="text-muted">Already Friends</span>
+              <form action="{{ url_for('social.remove_friend_route', target_user_id=user_result.id) }}" method="post">
+                <button type="submit" class="button-sm button-danger">Remove Friend</button>
+              </form>
+            {% elif user_result.friendship_status == 'pending' %}
+              {# Could check who sent it, but for now, just "Pending" #}
+              <span class="text-muted">Request Pending</span>
+              {# Add cancel request if g.user sent it #}
+            {% elif user_result.friendship_status == 'blocked' %}
+              <span class="text-danger">Blocked</span>
+              {# Option to unblock if g.user blocked them #}
+              {# {% if user_result.blocked_by_current_user %} #} {# Needs more advanced status from DB #}
+              <form action="{{ url_for('social.unblock_user_route', target_user_id=user_result.id) }}" method="post">
+                  <button type="submit" class="button-sm button-warning">Unblock</button>
+              </form>
+              {# {% endif %} #}
+            {% else %} {# No existing relationship or they were rejected/unfriended #}
+              <form action="{{ url_for('social.send_request_route', target_user_id=user_result.id) }}" method="post">
+                <button type="submit" class="button-sm button-primary">Add Friend</button>
+              </form>
+            {% endif %}
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% elif query %}
+  <p>No users found matching your exact query for "{{ query }}". Try a different username.</p>
+  <p><small>Note: Current search is exact. Partial username search will be implemented later.</small></p>
+{% endif %}
+{% endblock %}

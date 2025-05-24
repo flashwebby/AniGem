@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if target_subcommunity %}
+    Create Post in r/{{ target_subcommunity.name }}
+  {% else %}
+    Create New Post
+  {% endif %}
+{% endblock %}
+
+{% block header %}
+  <h1>
+    {% if target_subcommunity %}
+      Create Post in r/{{ target_subcommunity.name }}
+    {% else %}
+      Create New Post
+    {% endif %}
+  </h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+  .form-group input[type="text"],
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  .form-group textarea { min-height: 150px; }
+</style>
+
+<form method="post">
+  <div class="form-group">
+    <label for="title">Title</label>
+    <input type="text" name="title" id="title" value="{{ request.form['title'] }}" required>
+  </div>
+
+  <div class="form-group">
+    <label for="content">Content</label>
+    <textarea name="content" id="content" required>{{ request.form['content'] }}</textarea>
+  </div>
+
+  {% if not target_subcommunity %}
+  <div class="form-group">
+    <label for="subcommunity_id">Subcommunity (Optional)</label>
+    <select name="subcommunity_id" id="subcommunity_id">
+      <option value="">General / No Subcommunity</option>
+      {% for sub in subcommunities %}
+        <option value="{{ sub.id }}" {% if request.form['subcommunity_id']|int == sub.id %}selected{% endif %}>
+          {{ sub.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  {% else %}
+    {# If target_subcommunity is defined, we are posting to it directly #}
+    {# No need to show a selector, subcommunity_id is passed via URL in create_post route #}
+  {% endif %}
+
+  <div class="form-group">
+    <label for="post_type">Post Type</label>
+    <select name="post_type" id="post_type">
+      <option value="discussion" {% if request.form['post_type'] == 'discussion' %}selected{% endif %}>Discussion</option>
+      <option value="meme" {% if request.form['post_type'] == 'meme' %}selected{% endif %}>Meme</option>
+      <option value="theory" {% if request.form['post_type'] == 'theory' %}selected{% endif %}>Theory</option>
+      {# Add other post types as needed from schema #}
+    </select>
+  </div>
+
+  <input type="submit" value="Create Post" class="button">
+</form>
+{% endblock %}

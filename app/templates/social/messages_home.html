@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}My Messages{% endblock %}
+
+{% block header %}
+  <h1>Direct Messages</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  .conversations-list { list-style: none; padding: 0; }
+  .conversation-item { 
+    display: flex; 
+    align-items: center; 
+    padding: 10px; 
+    border: 1px solid #eee; 
+    border-radius: 4px; 
+    margin-bottom: 10px;
+    background-color: #fff;
+    text-decoration: none;
+    color: inherit;
+  }
+  .conversation-item:hover { background-color: #f8f9fa; }
+  .conversation-item.unread-conversation { font-weight: bold; background-color: #eef7ff; }
+  .conversation-avatar img { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; }
+  .conversation-summary { flex-grow: 1; }
+  .conversation-summary .username { font-size: 1.1em; color: #333; }
+  .conversation-summary .last-message { font-size: 0.9em; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;}
+  .conversation-meta { text-align: right; min-width: 100px; }
+  .conversation-meta .timestamp { font-size: 0.8em; color: #999; }
+  .conversation-meta .unread-badge { 
+    background-color: red; color: white; 
+    border-radius: 10px; padding: 3px 7px; 
+    font-size: 0.75em; display: inline-block; margin-top: 5px;
+  }
+</style>
+
+{% if conversations %}
+  <ul class="conversations-list">
+    {% for convo in conversations %}
+      <a href="{{ url_for('social.conversation_detail', other_user_id=convo.other_user_id) }}" class="conversation-item {% if convo.unread_count > 0 %}unread-conversation{% endif %}">
+        <div class="conversation-avatar">
+          <img src="{{ convo.other_user_avatar_url if convo.other_user_avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ convo.other_user_username }} avatar">
+        </div>
+        <div class="conversation-summary">
+          <div class="username">{{ convo.other_user_username }}</div>
+          <div class="last-message">{{ convo.last_message_content|truncate(50) }}</div>
+        </div>
+        <div class="conversation-meta">
+          <div class="timestamp">{{ convo.last_message_sent_at.strftime('%Y-%m-%d %H:%M') if convo.last_message_sent_at else 'No messages yet' }}</div>
+          {% if convo.unread_count > 0 %}
+            <span class="unread-badge">{{ convo.unread_count }}</span>
+          {% endif %}
+        </div>
+      </a>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You have no active conversations. <a href="{{ url_for('social.user_search') }}">Find users</a> to start chatting with.</p>
+{% endif %}
+{% endblock %}

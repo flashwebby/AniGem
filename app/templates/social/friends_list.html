@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}My Friends{% endblock %}
+
+{% block header %}
+  <h1>My Friends</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  .friends-list { list-style: none; padding: 0; }
+  .friend-item { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 10px; 
+    border: 1px solid #eee; 
+    border-radius: 4px; 
+    margin-bottom: 10px;
+    background-color: #fff;
+  }
+  .friend-info { display: flex; align-items: center; }
+  .friend-info img.avatar-small { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+  .friend-actions form, .friend-actions a { display: inline-block; margin-left: 5px;}
+</style>
+
+{% if friends %}
+  <ul class="friends-list">
+    {% for friend_rel in friends %} {# friend_rel is a Friendship object with helper attributes #}
+      <li class="friend-item">
+        <div class="friend-info">
+          <img src="{{ friend_rel.friend_avatar_url if friend_rel.friend_avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ friend_rel.friend_username }} avatar" class="avatar-small">
+          <a href="{{ url_for('user.profile', username=friend_rel.friend_username) }}">{{ friend_rel.friend_username }}</a>
+        </div>
+        <div class="friend-actions">
+          <a href="{{ url_for('social.conversation_detail', other_user_id=friend_rel.friend_id) }}" class="button-sm">Send Message</a>
+          <form action="{{ url_for('social.remove_friend_route', target_user_id=friend_rel.friend_id) }}" method="post">
+            <button type="submit" class="button-sm button-danger">Remove Friend</button>
+          </form>
+          <form action="{{ url_for('social.block_user_route', target_user_id=friend_rel.friend_id) }}" method="post">
+            <button type="submit" class="button-sm button-warning">Block</button>
+          </form>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You don't have any friends yet. Why not <a href="{{ url_for('social.user_search') }}">search for some users</a>?</p>
+{% endif %}
+
+<p style="margin-top: 20px;">
+  <a href="{{ url_for('social.friend_requests_page') }}" class="button">View Friend Requests</a>
+  <a href="{{ url_for('social.user_search') }}" class="button">Find Users</a>
+</p>
+{% endblock %}

@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ anime.title }}{% endblock %}
+
+{% block header %}
+  <h1>{{ anime.title }}</h1>
+{% endblock %}
+
+{% block content %}
+  <style>
+    .anime-detail-container { display: flex; flex-wrap: wrap; gap: 20px; }
+    .anime-cover { flex: 1 1 300px; max-width: 350px; }
+    .anime-cover img { width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .anime-info { flex: 2 1 400px; }
+    .anime-info h2 { font-size: 1.8em; margin-bottom: 10px; color: #333; }
+    .anime-info p { font-size: 1em; line-height: 1.6; margin-bottom: 10px; }
+    .anime-info strong { color: #555; }
+    .meta-tags span { 
+        display: inline-block; 
+        background-color: #e9ecef; 
+        color: #495057; 
+        padding: 5px 10px; 
+        margin-right: 5px; 
+        margin-bottom: 5px; 
+        border-radius: 15px; 
+        font-size: 0.9em;
+    }
+    .description { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+  </style>
+
+  <div class="anime-detail-container">
+    <div class="anime-cover">
+      <img src="{{ anime.cover_image_url if anime.cover_image_url else url_for('static', filename='images/default_cover.png') }}" alt="Cover image for {{ anime.title }}">
+    </div>
+    <div class="anime-info">
+      <h2>{{ anime.title }}</h2>
+      <p><strong>Release Year:</strong> {{ anime.release_year if anime.release_year else 'N/A' }}</p>
+      <p><strong>Language:</strong> {{ anime.language if anime.language else 'N/A' }}</p>
+      <p><strong>Average Rating:</strong> 
+        <span class="rating-score">
+          {{ "%.1f"|format(anime.average_rating) if anime.average_rating else 'Not yet rated' }}
+        </span> / 10
+      </p>
+      
+      <div class="meta-tags genres">
+        <p><strong>Genres:</strong>
+          {% if anime.genres %}
+            {% for genre in anime.genres %}
+              <a href="{{ url_for('anime.list_anime', genre_id=genre.id) }}"><span class="tag is-info">{{ genre.name }}</span></a>
+            {% endfor %}
+          {% else %}
+            <span>N/A</span>
+          {% endif %}
+        </p>
+      </div>
+
+      <div class="meta-tags tags">
+        <p><strong>Tags:</strong>
+          {% if anime.tags %}
+            {% for tag in anime.tags %}
+             <a href="{{ url_for('anime.list_anime', tag_id=tag.id) }}"><span class="tag is-light">{{ tag.name }}</span></a>
+            {% endfor %}
+          {% else %}
+            <span>N/A</span>
+          {% endif %}
+        </p>
+      </div>
+
+      {% if anime.description %}
+        <div class="description">
+          <h3>Synopsis</h3>
+          <p>{{ anime.description }}</p>
+        </div>
+      {% endif %}
+      
+      {# Placeholder for Ratings/Reviews section #}
+      <div style="margin-top:30px; padding-top:20px; border-top:1px solid #eee;">
+        <h4>Rate this Anime</h4>
+        {% if g.user %}
+          <form action="{{ url_for('ratings_reviews.rate_anime', anime_id=anime.id) }}" method="post" class="rating-form">
+            <div class="star-rating">
+              {% for i in range(10, 0, -1) %}
+                <input type="radio" id="star{{i}}" name="score" value="{{i}}" {% if current_user_rating and current_user_rating.score == i %}checked{% endif %}>
+                <label for="star{{i}}" title="{{i}} stars">&#9733;</label>
+              {% endfor %}
+            </div>
+            <input type="submit" value="Submit Rating">
+          </form>
+          {% if current_user_rating %}
+            <p>Your current rating: {{ current_user_rating.score }}/10</p>
+          {% else %}
+            <p>You have not rated this anime yet.</p>
+          {% endif %}
+        {% else %}
+          <p><a href="{{ url_for('auth.login', next=request.url) }}">Log in</a> to rate this anime.</p>
+        {% endif %}
+      </div>
+
+      <div style="margin-top:30px; padding-top:20px; border-top:1px solid #eee;">
+        <h4>Submit a Review</h4>
+        {% if g.user %}
+          <form action="{{ url_for('ratings_reviews.review_anime', anime_id=anime.id) }}" method="post" class="review-form">
+            <div>
+              <label for="text_content">Your Review:</label>
+              <textarea name="text_content" id="text_content" rows="5" required></textarea>
+            </div>
+            <div>
+              <input type="checkbox" name="is_spoiler" id="is_spoiler">
+              <label for="is_spoiler">This review contains spoilers</label>
+            </div>
+            <input type="submit" value="Post Review">
+          </form>
+        {% else %}
+          <p><a href="{{ url_for('auth.login', next=request.url) }}">Log in</a> to post a review.</p>
+        {% endif %}
+      </div>
+
+      <div style="margin-top:30px; padding-top:20px; border-top:1px solid #eee;">
+        <h4>User Reviews</h4>
+        {% if reviews %}
+          <ul class="review-list">
+            {% for review in reviews %}
+              <li class="review-item">
+                <div class="review-author">
+                  <img src="{{ review.user.avatar_url if review.user.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ review.user.username }} avatar" class="avatar-small">
+                  <strong>{{ review.user.username }}</strong> 
+                  {% if review.rating_score %}
+                    <span class="review-rating-score">(Rated: {{ review.rating_score }}/10)</span>
+                  {% endif %}
+                  <span class="review-timestamp"> - {{ review.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="review-content">
+                  {% if review.is_spoiler %}
+                    <div class="spoiler-text hidden-spoiler">
+                      <p>{{ review.text_content }}</p>
+                    </div>
+                    <button class="reveal-spoiler-btn">Reveal Spoiler</button>
+                  {% else %}
+                    <p>{{ review.text_content }}</p>
+                  {% endif %}
+                </div>
+                <div class="review-actions">
+                  <form action="{{ url_for('ratings_reviews.vote_review', review_id=review.id) }}" method="post" style="display: inline;">
+                    <input type="hidden" name="vote_type" value="upvote">
+                    <button type="submit" class="vote-btn upvote {% if user_votes and user_votes[review.id] == 'upvote' %}active{% endif %}">
+                        &#x1F44D; <span>{{ review.upvotes }}</span>
+                    </button>
+                  </form>
+                  <form action="{{ url_for('ratings_reviews.vote_review', review_id=review.id) }}" method="post" style="display: inline;">
+                    <input type="hidden" name="vote_type" value="downvote">
+                    <button type="submit" class="vote-btn downvote {% if user_votes and user_votes[review.id] == 'downvote' %}active{% endif %}">
+                        &#x1F44E; <span>{{ review.downvotes }}</span>
+                    </button>
+                  </form>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No reviews yet for this anime. Be the first to write one!</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  {# Navigation back to list #}
+  <div style="margin-top: 20px;">
+    <a href="{{ url_for('anime.list_anime') }}">&laquo; Back to Anime List</a>
+  </div>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}
+
+{% block styles %} {# Add specific styles for ratings and reviews #}
+{{ super() }}
+<style>
+  .rating-form .star-rating {
+    display: inline-block;
+    direction: rtl; /* Stars appear from right to left */
+  }
+  .rating-form .star-rating input[type="radio"] {
+    display: none; /* Hide radio buttons */
+  }
+  .rating-form .star-rating label {
+    font-size: 2em;
+    color: #ddd; /* Default star color */
+    cursor: pointer;
+    padding: 0 0.1em;
+  }
+  .rating-form .star-rating input[type="radio"]:checked ~ label,
+  .rating-form .star-rating label:hover,
+  .rating-form .star-rating label:hover ~ label {
+    color: #f5b301; /* Star color on hover/check */
+  }
+
+  .review-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 8px; border-radius: 3px; border: 1px solid #ccc;}
+  .review-form input[type="checkbox"] { margin-right: 5px; }
+  
+  .review-list { list-style: none; padding: 0; }
+  .review-item { margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 4px; background-color: #f9f9f9; }
+  .review-author { margin-bottom: 10px; }
+  .review-author .avatar-small { width: 30px; height: 30px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+  .review-author strong { font-size: 1.1em; }
+  .review-rating-score { font-size: 0.9em; color: #777; }
+  .review-timestamp { font-size: 0.8em; color: #999; }
+  .review-content .spoiler-text.hidden-spoiler { 
+    background-color: #333; color: #333; 
+    padding: 5px; border-radius: 3px; 
+    cursor: pointer; user-select: none;
+  }
+  .review-content .spoiler-text.hidden-spoiler:hover::after {
+    content: " (Click to reveal)";
+    color: #fff;
+    font-style: italic;
+    font-size: 0.9em;
+  }
+  .reveal-spoiler-btn { 
+    font-size: 0.8em; padding: 3px 8px; 
+    background-color: #777; color: white; 
+    border:none; border-radius:3px; margin-top:5px; cursor:pointer;
+  }
+  .reveal-spoiler-btn:hover { background-color: #555; }
+  .review-actions { margin-top: 10px; }
+  .vote-btn { background: none; border: 1px solid #ccc; border-radius: 15px; padding: 5px 10px; cursor: pointer; margin-right: 5px; font-size:0.9em;}
+  .vote-btn:hover { background-color: #f0f0f0; }
+  .vote-btn.active { background-color: #cce5ff; border-color: #b8daff; }
+  .vote-btn span { margin-left: 5px; }
+</style>
+{% endblock %}

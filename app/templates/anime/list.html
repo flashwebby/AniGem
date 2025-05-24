@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Anime List{% endblock %}
+
+{% block header %}
+  <h2>Anime Collection</h2>
+  <a href="{{ url_for('anime.surprise_me') }}" class="button surprise-button">Surprise Me!</a>
+  {# Optional: Link to add anime page #}
+  {# {% if g.user and g.user.is_admin %} #}
+  {# <a href="{{ url_for('anime.add_anime_route') }}">Add New Anime</a> #}
+  {# {% endif %} #}
+{% endblock %}
+
+{% block content %}
+  <style>
+    .filters { margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 4px; }
+    .filters form { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+    .filters label { font-weight: normal; margin-right: 5px; font-size: 0.9em; }
+    .filters select, .filters input[type="text"] { 
+        padding: 8px; 
+        border-radius: 4px; 
+        border: 1px solid #ddd; 
+        font-size: 0.9em;
+    }
+    .filters input[type="submit"] { 
+        padding: 8px 15px; 
+        background-color: #337ab7; 
+        color: white; border: none; 
+        border-radius: 4px; cursor: pointer; 
+        font-size: 0.9em;
+    }
+    .filters input[type="submit"]:hover { background-color: #286090; }
+    .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .anime-card { border: 1px solid #ddd; border-radius: 4px; padding: 15px; background-color: #fff; text-align: center; }
+    .anime-card img { max-width: 100%; height: auto; max-height: 250px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; }
+    .anime-card h3 { font-size: 1.1em; margin: 0.5em 0; }
+    .anime-card h3 a { text-decoration: none; color: #333; }
+    .anime-card h3 a:hover { color: #007bff; }
+    .anime-card p { font-size: 0.9em; color: #666; margin-bottom: 5px;}
+    .surprise-button { 
+        display: inline-block; 
+        padding: 10px 15px; 
+        background-color: #28a745; 
+        color: white; 
+        text-decoration: none; 
+        border-radius: 5px;
+        font-size: 1em;
+        margin-left: 20px; 
+    }
+    .surprise-button:hover { background-color: #218838; }
+    .no-anime { text-align: center; padding: 20px; color: #777; }
+  </style>
+
+  <div class="filters">
+    <form method="get" action="{{ url_for('anime.list_anime') }}">
+      <div>
+        <label for="genre_id">Genre:</label>
+        <select name="genre_id" id="genre_id">
+          <option value="">All Genres</option>
+          {% for genre in genres %}
+            <option value="{{ genre.id }}" {% if genre.id == selected_genre_id %}selected{% endif %}>{{ genre.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="tag_id">Tag:</label>
+        <select name="tag_id" id="tag_id">
+          <option value="">All Tags</option>
+          {% for tag in tags %}
+            <option value="{{ tag.id }}" {% if tag.id == selected_tag_id %}selected{% endif %}>{{ tag.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="release_year">Year:</label>
+        <select name="release_year" id="release_year">
+          <option value="">All Years</option>
+          {% for year in available_years %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="language">Language:</label>
+        <select name="language" id="language">
+          <option value="all">All Languages</option>
+          {% for lang in available_languages %}
+            <option value="{{ lang }}" {% if lang == selected_language %}selected{% endif %}>{{ lang }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <input type="submit" value="Filter">
+    </form>
+  </div>
+
+  {% if anime_list %}
+    <div class="anime-grid">
+      {% for anime_item in anime_list %}
+        <div class="anime-card">
+          <a href="{{ url_for('anime.detail', anime_id=anime_item.id) }}">
+            <img src="{{ anime_item.cover_image_url if anime_item.cover_image_url else url_for('static', filename='images/default_cover.png') }}" alt="{{ anime_item.title }} cover">
+            <h3>{{ anime_item.title }}</h3>
+          </a>
+          <p>Year: {{ anime_item.release_year if anime_item.release_year else 'N/A' }}</p>
+          <p>Rating: {{ "%.1f"|format(anime_item.average_rating) if anime_item.average_rating else 'N/A' }}</p>
+          <p>
+            Genres: 
+            {% for genre in anime_item.genres %}
+              {{ genre.name }}{% if not loop.last %}, {% endif %}
+            {% else %}
+              N/A
+            {% endfor %}
+          </p>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="no-anime">No anime found matching your criteria. Try broadening your search or <a href="{{ url_for('anime.list_anime') }}">view all anime</a>.</p>
+  {% endif %}
+{% endblock %}

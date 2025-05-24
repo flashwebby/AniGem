@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - Community{% endblock %}
+
+{% block header %}
+  <h1>{{ post.title }}</h1>
+  <p class="post-meta">
+    Posted by 
+    <a href="{{ url_for('user.profile', username=post.user.username) }}">{{ post.user.username }}</a>
+    {% if post.subcommunity %}
+      in <a href="{{ url_for('community.subcommunity_detail', subcommunity_identifier=post.subcommunity.id) }}">r/{{ post.subcommunity.name }}</a>
+    {% endif %}
+    on {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+  </p>
+{% endblock %}
+
+{% block content %}
+<style>
+  .post-content { margin-bottom: 20px; padding-bottom:20px; border-bottom: 1px solid #eee; }
+  .post-actions { margin-bottom: 20px; }
+  .vote-buttons button {
+    background-color: #f0f0f0; border: 1px solid #ddd;
+    padding: 8px 12px; margin-right: 5px; border-radius: 4px; cursor: pointer;
+  }
+  .vote-buttons button.active { background-color: #cce5ff; border-color: #b8daff; }
+  .vote-buttons button:hover { background-color: #e7e7e7; }
+  .vote-count { margin: 0 10px; font-weight: bold; }
+
+  .comments-section { margin-top: 20px; }
+  .comment-form textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+  .comment-form input[type="submit"] { background-color: #5cb85c; color: white; padding: 8px 15px; border:none; border-radius:4px; cursor:pointer; }
+  .comment-form input[type="submit"]:hover { background-color: #4cae4c; }
+  
+  /* Styles for _comment.html partial will be implicitly used here */
+  .comment-thread { list-style: none; padding-left: 0; }
+  .comment-item { 
+    background-color: #f9f9f9; 
+    border: 1px solid #eee; 
+    border-radius: 4px; 
+    padding: 10px; 
+    margin-top: 10px; 
+  }
+  .comment-author { font-weight: bold; }
+  .comment-meta { font-size: 0.8em; color: #888; margin-bottom: 5px; }
+  .comment-content { margin-bottom: 8px; }
+  .reply-link { font-size: 0.9em; color: #337ab7; cursor: pointer; }
+  .reply-form { margin-left: 20px; margin-top: 10px; display: none; /* Hidden by default */ }
+</style>
+
+<article class="post-content">
+  {{ post.content|safe }} {# Assuming content might be HTML or Markdown later #}
+</article>
+
+<div class="post-actions">
+  <span class="vote-buttons">
+    <button class="vote-btn upvote-btn {% if user_vote == 'upvote' %}active{% endif %}" data-post-id="{{ post.id }}" data-vote-type="upvote">
+      &#x1F44D; <span class="upvote-count">{{ post.upvotes }}</span>
+    </button>
+    <button class="vote-btn downvote-btn {% if user_vote == 'downvote' %}active{% endif %}" data-post-id="{{ post.id }}" data-vote-type="downvote">
+      &#x1F44E; <span class="downvote-count">{{ post.downvotes }}</span>
+    </button>
+  </span>
+</div>
+
+<section class="comments-section">
+  <h3>Comments ({{ post.comment_count }})</h3>
+  {% if g.user %}
+    <form action="{{ url_for('community.comment_on_post', post_id=post.id) }}" method="post" class="comment-form">
+      <div>
+        <label for="text_content">Leave a comment:</label>
+        <textarea name="text_content" id="text_content" rows="3" required></textarea>
+      </div>
+      <input type="submit" value="Post Comment">
+    </form>
+  {% else %}
+    <p><a href="{{ url_for('auth.login', next=request.url) }}">Log in</a> to leave a comment.</p>
+  {% endif %}
+
+  {% if comments %}
+    {% include 'partials/_comment.html' with context %} {# Pass current context for comments variable #}
+  {% else %}
+    <p>No comments yet. Be the first to share your thoughts!</p>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+// JavaScript for post voting (can be moved to main.js if preferred and expanded)
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.vote-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const postId = this.dataset.postId;
+            const voteType = this.dataset.voteType;
+            const upvoteBtn = document.querySelector(`.upvote-btn[data-post-id='${postId}']`);
+            const downvoteBtn = document.querySelector(`.downvote-btn[data-post-id='${postId}']`);
+            const upvoteCountSpan = upvoteBtn.querySelector('.upvote-count');
+            const downvoteCountSpan = downvoteBtn.querySelector('.downvote-count');
+
+            fetch(`{{ url_for('community.vote_post', post_id=0) }}`.replace('0', postId) + '/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    // Add CSRF token header if you're using Flask-WTF or similar
+                    // 'X-CSRFToken': '{{ csrf_token() }}' 
+                },
+                body: `vote_type=${voteType}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    upvoteCountSpan.textContent = data.upvotes;
+                    downvoteCountSpan.textContent = data.downvotes;
+                    
+                    // Update active state of buttons
+                    upvoteBtn.classList.remove('active');
+                    downvoteBtn.classList.remove('active');
+                    if (data.new_vote_status === 'upvote') {
+                        upvoteBtn.classList.add('active');
+                    } else if (data.new_vote_status === 'downvote') {
+                        downvoteBtn.classList.add('active');
+                    }
+                    // flash(data.message, 'success'); // Would need a JS flash message system
+                } else {
+                    // flash(data.message, 'error');
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while voting.');
+            });
+        });
+    });
+
+    // Basic reply form toggle
+    document.querySelectorAll('.reply-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetFormId = this.dataset.formTarget;
+            const form = document.getElementById(targetFormId);
+            if (form) {
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

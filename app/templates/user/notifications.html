@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Notifications{% endblock %}
+
+{% block header %}
+  <h1>Notifications</h1>
+  {% if notifications %}
+    <form action="{{ url_for('user_activity.read_all_notifications') }}" method="post" style="display: inline-block; margin-left: 20px;">
+      <button type="submit" class="button-sm">Mark All as Read</button>
+    </form>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+  .notifications-list { list-style: none; padding: 0; }
+  .notification-item { 
+    padding: 10px 15px; 
+    margin-bottom: 10px; 
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .notification-item.unread { background-color: #eef7ff; border-left: 3px solid #007bff; }
+  .notification-content a { text-decoration: none; color: #007bff; }
+  .notification-content a:hover { text-decoration: underline; }
+  .notification-timestamp { font-size: 0.85em; color: #777; margin-top: 5px; }
+  .notification-actions button { font-size: 0.9em; padding: 5px 10px; }
+</style>
+
+{% if notifications %}
+  <ul class="notifications-list">
+    {% for notification in notifications %}
+      <li class="notification-item {% if not notification.is_read %}unread{% endif %}" id="notification-{{ notification.id }}">
+        <div class="notification-details">
+          <div class="notification-content">
+            {% if notification.link_url %}
+              <a href="{{ notification.link_url }}">{{ notification.content }}</a>
+            {% else %}
+              {{ notification.content }}
+            {% endif %}
+          </div>
+          <div class="notification-timestamp">
+            {{ notification.created_at.strftime('%Y-%m-%d %H:%M') }} - Type: {{ notification.type.replace('_', ' ')|title }}
+          </div>
+        </div>
+        <div class="notification-actions">
+          {% if not notification.is_read %}
+            <form action="{{ url_for('user_activity.read_notification', notification_id=notification.id) }}" method="post">
+              <button type="submit" class="button-sm button-outline">Mark as Read</button>
+            </form>
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You have no notifications.</p>
+{% endif %}
+
+{# Potential AJAX script for marking as read without page reload could go here or in main.js #}
+{% endblock %}

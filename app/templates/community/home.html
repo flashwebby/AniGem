@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Community Hub{% endblock %}
+
+{% block header %}
+  <h1>Welcome to the Community Hub</h1>
+  <a href="{{ url_for('community.create_subcommunity') }}" class="button">Create New Subcommunity</a>
+  <a href="{{ url_for('community.create_post') }}" class="button">Create New Post</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .community-layout { display: flex; gap: 20px; }
+  .subcommunities-list { flex: 1; }
+  .recent-posts-feed { flex: 2; }
+  .subcommunity-card, .post-summary-card { 
+    background-color: #fff; 
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+    padding: 15px; 
+    margin-bottom: 15px; 
+  }
+  .subcommunity-card h3 a, .post-summary-card h3 a { text-decoration: none; color: #337ab7; }
+  .subcommunity-card h3 a:hover, .post-summary-card h3 a:hover { text-decoration: underline; }
+  .post-meta { font-size: 0.85em; color: #777; margin-top: 5px; }
+  .post-meta a { color: #777; }
+  .post-meta a:hover { text-decoration: underline; }
+</style>
+
+<div class="community-layout">
+  <aside class="subcommunities-list">
+    <h2>Subcommunities</h2>
+    {% if subcommunities %}
+      {% for sub in subcommunities %}
+        <div class="subcommunity-card">
+          <h3><a href="{{ url_for('community.subcommunity_detail', subcommunity_identifier=sub.id) }}">{{ sub.name }}</a></h3>
+          <p>{{ sub.description|truncate(100) if sub.description else 'No description available.' }}</p>
+          <p class="post-meta">Created by: {{ sub.creator_username }} on {{ sub.created_at.strftime('%Y-%m-%d') if sub.created_at }}</p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No subcommunities yet. Why not <a href="{{ url_for('community.create_subcommunity') }}">create one</a>?</p>
+    {% endif %}
+  </aside>
+
+  <section class="recent-posts-feed">
+    <h2>Recent Posts</h2>
+    {% if recent_posts %}
+      {% for post in recent_posts %}
+        <article class="post-summary-card">
+          <h3><a href="{{ url_for('community.post_detail', post_id=post.id) }}">{{ post.title }}</a></h3>
+          <p class="post-meta">
+            By <a href="{{ url_for('user.profile', username=post.user.username) }}">{{ post.user.username }}</a>
+            {% if post.subcommunity %}
+              in <a href="{{ url_for('community.subcommunity_detail', subcommunity_identifier=post.subcommunity.id) }}">{{ post.subcommunity.name }}</a>
+            {% endif %}
+            on {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+          </p>
+          <p class="post-meta">
+            {{ post.upvotes }} Upvotes | {{ post.downvotes }} Downvotes | {{ post.comment_count }} Comments
+          </p>
+          {# Snippet of post content could go here if fetched #}
+        </article>
+      {% endfor %}
+    {% else %}
+      <p>No posts yet. <a href="{{ url_for('community.create_post') }}">Be the first to post!</a></p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

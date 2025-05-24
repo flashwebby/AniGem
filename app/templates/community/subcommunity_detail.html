@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ subcommunity.name }} - Community{% endblock %}
+
+{% block header %}
+  <h1>r/{{ subcommunity.name }}</h1>
+  <p>{{ subcommunity.description }}</p>
+  <p><small>Created by {{ subcommunity.creator_username }} on {{ subcommunity.created_at.strftime('%Y-%m-%d') if subcommunity.created_at }}</small></p>
+  <a href="{{ url_for('community.create_post', subcommunity_id=subcommunity.id) }}" class="button">Submit New Post to r/{{ subcommunity.name }}</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .post-list { list-style: none; padding: 0; }
+  .post-item { 
+    background-color: #fff; 
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+    padding: 15px; 
+    margin-bottom: 15px; 
+  }
+  .post-item h3 a { text-decoration: none; color: #337ab7; }
+  .post-item h3 a:hover { text-decoration: underline; }
+  .post-meta { font-size: 0.85em; color: #777; margin-top: 5px; }
+  .post-meta a { color: #777; }
+  .post-meta a:hover { text-decoration: underline; }
+</style>
+
+<h2>Posts in r/{{ subcommunity.name }}</h2>
+{% if posts %}
+  <ul class="post-list">
+    {% for post in posts %}
+      <li class="post-item">
+        <h3><a href="{{ url_for('community.post_detail', post_id=post.id) }}">{{ post.title }}</a></h3>
+        <p class="post-meta">
+          Posted by <a href="{{ url_for('user.profile', username=post.user.username) }}">{{ post.user.username }}</a> 
+          on {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+        </p>
+        <p class="post-meta">
+          {{ post.upvotes }} Upvotes | {{ post.downvotes }} Downvotes | {{ post.comment_count }} Comments
+        </p>
+        {# Display a snippet of post content if available and desired #}
+        {# <p>{{ post.content|truncate(200) }}</p> #}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No posts in this subcommunity yet. <a href="{{ url_for('community.create_post', subcommunity_id=subcommunity.id) }}">Be the first to submit one!</a></p>
+{% endif %}
+{% endblock %}
