@@ -45,9 +45,10 @@ def create_app(test_config=None):
     from .routes import user_activity # Added this line
     app.register_blueprint(user_activity.bp) # Added this line
 
-    # A simple hello route (can be removed later)
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
+    # Route for the new homepage
+    @app.route('/')
+    def hello(): # Renaming to 'home' would be more descriptive, but keeping 'hello' as per instruction to modify existing
+        from flask import render_template
+        return render_template('home.html')
 
     return app

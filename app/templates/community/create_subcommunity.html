@@ -3,37 +3,58 @@
 {% block title %}Create New Subcommunity{% endblock %}
 
 {% block header %}
-  <h1>Create New Subcommunity</h1>
+  {# Header is handled within the content block for this page structure #}
 {% endblock %}
 
 {% block content %}
 <style>
-  .form-group { margin-bottom: 15px; }
-  .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-  .form-group input[type="text"],
-  .form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+  .create-subcommunity-card {
+    max-width: 700px; /* Limit width for better readability */
+    margin: 2rem auto; /* Center the card */
   }
-  .form-group textarea { min-height: 100px; }
 </style>
 
-<form method="post">
-  <div class="form-group">
-    <label for="name">Subcommunity Name (e.g., ActionLovers, IsekaiFans)</label>
-    <input type="text" name="name" id="name" value="{{ request.form['name'] }}" required>
-    <small>No spaces or special characters other than hyphens/underscores usually. This will be part of the URL (e.g., /s/ActionLovers).</small>
-  </div>
+<div class="container mt-4">
+  <div class="card shadow-sm create-subcommunity-card">
+    <div class="card-header bg-light">
+      <h1 class="h3 mb-0">Create New Subcommunity</h1>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        <div class="form-group">
+          <label for="name">Subcommunity Name</label>
+          <input type="text" name="name" id="name" class="form-control form-control-lg" value="{{ request.form['name'] }}" placeholder="e.g., ActionPackedAdventures" required>
+          <small class="form-text text-muted">This will be part of the URL (e.g., /s/ActionPackedAdventures). Use letters, numbers, hyphens, or underscores. No spaces.</small>
+        </div>
 
-  <div class="form-group">
-    <label for="description">Description</label>
-    <textarea name="description" id="description">{{ request.form['description'] }}</textarea>
-    <small>A brief description of what your subcommunity is about.</small>
-  </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea name="description" id="description" class="form-control" rows="5" placeholder="What is this subcommunity about? Share its purpose, main topics, and vibe." required>{{ request.form['description'] }}</textarea>
+          <small class="form-text text-muted">A clear and inviting description helps users understand your community.</small>
+        </div>
 
-  <input type="submit" value="Create Subcommunity" class="button">
-</form>
+        {# Placeholder for future fields like rules or privacy settings #}
+        {# <div class="form-group">
+          <label for="rules">Rules (Optional)</label>
+          <textarea name="rules" id="rules" class="form-control" rows="3" placeholder="Enter community rules, one per line."></textarea>
+        </div>
+        <div class="form-group">
+            <label for="privacy">Privacy Level</label>
+            <select name="privacy" id="privacy" class="form-control custom-select">
+                <option value="public" selected>Public (Anyone can view and join)</option>
+                <option value="private">Private (Members must be approved to view and join)</option>
+            </select>
+        </div> #}
+        <hr>
+        <div class="d-flex justify-content-end">
+            <a href="{{ url_for('community.home') }}" class="btn btn-outline-secondary mr-2">Cancel</a>
+            <button type="submit" class="btn btn-success">
+                {# <i class="fas fa-plus-circle mr-1"></i> #} <!-- Placeholder icon -->
+                Create Subcommunity
+            </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

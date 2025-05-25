@@ -1,67 +1,279 @@
-body { font-family: sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; }
-nav { background-color: #333; padding: 10px 20px; margin-bottom: 20px; }
-nav ul { list-style-type: none; padding: 0; margin: 0; display: flex; align-items: center; }
-nav ul li { margin-right: 15px; }
-nav ul li a { color: white; text-decoration: none; font-size: 1em; }
-nav ul li a:hover { text-decoration: underline; }
-nav ul li span { color: #aaa; font-size: 0.9em; } /* For 'Hi, username!' */
-
-.container { 
-  background-color: white; 
-  padding: 20px; 
-  margin: 0 20px 20px 20px; /* Add margin to all sides */
-  border-radius: 5px; 
-  box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-}
-
-.flash { 
-  padding: 10px; 
-  margin-bottom: 20px; /* Increased margin for better separation */
-  border-radius: 3px; 
-  font-size: 0.95em;
-}
-.flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-.flash.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-
-label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9em; }
-input[type="text"], 
-input[type="email"], 
-input[type="password"] {
-  width: calc(100% - 22px); /* Full width minus padding and border */
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  box-sizing: border-box; /* Important for width calculation */
-  font-size: 1em;
-}
-
-input[type="submit"] {
-  background-color: #5cb85c;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 1em;
-}
-input[type="submit"]:hover { background-color: #4cae4c; }
-
-h1, h2 { color: #333; margin-top: 0; } /* Remove default top margin for headings */
-h1 { font-size: 1.8em; margin-bottom: 20px;}
-h2 { font-size: 1.5em; margin-bottom: 15px;}
-
-/* Profile page specific styles */
-.profile-info p {
-  font-size: 1em;
+/* Global Reset & Typography */
+body {
+  font-family: 'Roboto', sans-serif; /* A more modern sans-serif font */
+  margin: 0;
+  padding: 0;
+  background-color: #eef1f5; /* Lighter, softer background */
+  color: #333;
   line-height: 1.6;
-  margin-bottom: 10px;
-}
-.profile-info strong {
-  color: #555;
 }
 
-/* Base.html specific body padding to prevent content from touching window edges */
-body > nav + .container {
-  margin-top: 0; /* Nav already has margin-bottom */
+/* Navbar adjustments - Assuming Bootstrap navbar is used from base.html */
+/* The base.html already includes Bootstrap, so specific nav styling here might be redundant if base.html is correctly set up.
+   If navbar issues persist, they should be addressed in base.html's Bootstrap structure or here. */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle shadow for depth */
 }
+
+/* Container - Main content wrapper from base.html */
+/* .container in base.html is fine with Bootstrap's default, but if a max-width is desired for content: */
+/*
+main.container {
+  max-width: 1200px; /* Or your preferred max width */
+  /* background-color: #fff; */ /* Content area background */
+  /* padding: 2rem; */
+  /* margin-top: 1.5rem; */ /* Space from navbar */
+  /* margin-bottom: 1.5rem; */
+  /* border-radius: .3rem; */
+  /* box-shadow: 0 0 15px rgba(0,0,0,0.05); */
+/* }
+*/
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 500; /* Slightly bolder headings */
+  color: #2c3e50; /* Darker, sophisticated color for headings */
+}
+
+/* Buttons - General Bootstrap button styling is good, but can add app-wide consistency */
+.btn {
+  border-radius: .25rem; /* Consistent border-radius */
+  font-weight: 500;
+}
+.btn-primary {
+  background-color: #007bff; /* Primary color */
+  border-color: #007bff;
+}
+.btn-primary:hover {
+  background-color: #0069d9;
+  border-color: #0062cc;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+
+/* Forms - Bootstrap form styling is generally good. Customizations can go here if needed. */
+.form-control {
+  border-radius: .25rem; /* Consistent border-radius */
+}
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
+}
+label {
+  font-weight: 500; /* Consistent label weight */
+  margin-bottom: .5rem;
+}
+
+/* Cards - Bootstrap cards are used extensively */
+.card {
+  border: none; /* Remove default card border for a cleaner look if using shadows */
+  /* box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); */ /* Softer shadow, can be default from Bootstrap */
+}
+.card-header {
+  background-color: #f8f9fa; /* Light header for cards */
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 500;
+}
+
+/* Flash Messages - Already styled in base.html using Bootstrap alerts */
+
+/* Homepage Specific Styles */
+.hero-section {
+  background: url('images/hero_background.jpg') no-repeat center center; /* Ensure this path is correct */
+  background-size: cover;
+  color: white;
+  padding: 6rem 1.5rem; /* Increased padding */
+  text-align: center;
+  border-radius: 0; /* Full width hero */
+  margin-bottom: 2rem;
+}
+.hero-section .display-4 {
+  font-weight: 300;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7); /* Enhanced shadow */
+}
+.hero-section .lead {
+  font-size: 1.6rem; /* Larger lead text */
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+.hero-section .btn-lg {
+    padding: .75rem 1.5rem; /* Larger buttons */
+    font-size: 1.1rem;
+}
+
+.section-title {
+  margin-bottom: 2.5rem; /* More space for section titles */
+  text-align: center;
+  font-weight: 300;
+  font-size: 2.25rem;
+  color: #343a40;
+}
+
+/* Anime Card Placeholders (from home.html) */
+.anime-card-placeholder {
+  height: 200px; /* Adjusted for card layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e9ecef;
+  border-radius: .25rem .25rem 0 0; /* Rounded top corners */
+  text-align: center;
+}
+.anime-card-placeholder .card-title {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-bottom: .25rem;
+}
+.anime-card-placeholder .card-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* Anime List Page Filters (from anime/list.html) */
+.filters-card {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 1.25rem; /* Slightly more padding */
+  border-radius: .3rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075); /* Subtle shadow */
+}
+.filters-card .form-group label {
+    font-weight: 500;
+    font-size: 0.9rem; /* Smaller label */
+}
+.filters-card .custom-select-sm {
+    height: calc(1.5em + .5rem + 2px); /* Ensure consistent height for select */
+}
+.filters-card .btn-primary {
+    background-color: #0069d9;
+    border-color: #0062cc;
+    font-weight: 500;
+}
+
+/* Anime Detail Page Specific Styles */
+.anime-cover-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: .3rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.anime-title-main {
+  font-size: 2.5rem;
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+}
+.anime-meta-info p {
+  font-size: 1rem;
+  margin-bottom: .5rem;
+}
+.anime-meta-info strong {
+  color: #495057;
+}
+.section-divider {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+.rating-form .star-rating label {
+  font-size: 2.2em;
+  color: #ced4da;
+}
+.rating-form .star-rating input[type="radio"]:checked ~ label,
+.rating-form .star-rating label:hover,
+.rating-form .star-rating label:hover ~ label {
+  color: #ffc107; /* Bootstrap warning color */
+}
+.review-item {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    box-shadow: 0 0.1rem 0.15rem rgba(0,0,0,.05);
+}
+.review-author img.avatar-small { /* Ensure consistency with other avatar styles */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.review-content .spoiler-text.hidden-spoiler {
+    background-color: #343a40; color: #343a40;
+    padding: .5rem; border-radius: .25rem; 
+    cursor: pointer; user-select: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.review-content .spoiler-text.hidden-spoiler:hover {
+    background-color: #495057;
+    color: #495057;
+}
+.review-content .spoiler-text.revealed { /* Added for when spoiler is shown */
+    background-color: transparent;
+    color: inherit;
+}
+.vote-btn span.badge { /* Ensure vote count badges are styled well */
+    font-size: 0.8em;
+}
+
+/* Auth Pages (Login/Register) */
+.auth-card .card-footer {
+  background-color: #f8f9fa;
+}
+.auth-card .form-control-lg { /* Make auth form inputs a bit larger */
+    padding: .75rem 1rem;
+    font-size: 1rem;
+}
+
+/* Footer styling - if not covered by base.html Bootstrap */
+footer.bg-light { /* Assuming footer in base.html has bg-light */
+    border-top: 1px solid #dee2e6;
+    font-size: 0.9em;
+}
+
+/* General utility classes that might be useful */
+.shadow-sm { box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important; }
+.shadow { box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+.shadow-lg { box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important; }
+
+/* Ensure avatars are consistent */
+.avatar-small {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 8px;
+    object-fit: cover; /* Ensures image covers the area without distortion */
+}
+img.rounded-circle.mr-3.avatar-small { /* For profile header */
+    width: 100px;
+    height: 100px;
+}
+
+/* Responsive adjustments if needed beyond Bootstrap defaults */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 4rem 1rem;
+  }
+  .hero-section .display-4 {
+    font-size: 2.5rem;
+  }
+  .hero-section .lead {
+    font-size: 1.25rem;
+  }
+  .section-title {
+    font-size: 1.75rem;
+  }
+}
+
+/* Fix for body padding if navbar-fixed-top is used, and it's not already handled in base.html */
+/* body { padding-top: 56px; } /* Default Bootstrap fixed navbar height */
+/* This was already in base.html <style> tag, so it's good. */
+
+/* Ensure that the .container in base.html doesn't override full-width elements like hero section */
+/* This would require modifying base.html to conditionally apply container, or using a different block for full-width content */
+/* For now, assuming hero section is outside the main content container or base.html structure allows it */

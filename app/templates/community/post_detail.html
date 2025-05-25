@@ -3,148 +3,138 @@
 {% block title %}{{ post.title }} - Community{% endblock %}
 
 {% block header %}
-  <h1>{{ post.title }}</h1>
-  <p class="post-meta">
-    Posted by 
-    <a href="{{ url_for('user.profile', username=post.user.username) }}">{{ post.user.username }}</a>
-    {% if post.subcommunity %}
-      in <a href="{{ url_for('community.subcommunity_detail', subcommunity_identifier=post.subcommunity.id) }}">r/{{ post.subcommunity.name }}</a>
-    {% endif %}
-    on {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
-  </p>
+  {# Post header is now part of the main content block for better layout control #}
 {% endblock %}
 
 {% block content %}
 <style>
-  .post-content { margin-bottom: 20px; padding-bottom:20px; border-bottom: 1px solid #eee; }
+  .post-header-meta {
+    font-size: 0.9rem;
+    color: #6c757d; /* Bootstrap text-muted color */
+  }
+  .post-header-meta a {
+    color: #545b62; /* Slightly darker for links in meta */
+    text-decoration: none;
+  }
+  .post-header-meta a:hover {
+    text-decoration: underline;
+  }
+  .post-body {
+    font-size: 1.1rem; /* Slightly larger for readability */
+    line-height: 1.7;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
   .post-actions { margin-bottom: 20px; }
-  .vote-buttons button {
+  .post-actions .btn {
+    font-weight: 500; /* Bolder text for action buttons */
+  }
+  /* .vote-buttons button {
     background-color: #f0f0f0; border: 1px solid #ddd;
     padding: 8px 12px; margin-right: 5px; border-radius: 4px; cursor: pointer;
-  }
-  .vote-buttons button.active { background-color: #cce5ff; border-color: #b8daff; }
-  .vote-buttons button:hover { background-color: #e7e7e7; }
-  .vote-count { margin: 0 10px; font-weight: bold; }
+  } */ /* Replaced by Bootstrap btn classes */
+  /* .vote-buttons button.active { background-color: #cce5ff; border-color: #b8daff; } */ /* Replaced by Bootstrap btn active state */
+  /* .vote-buttons button:hover { background-color: #e7e7e7; } */ /* Replaced by Bootstrap btn hover state */
+  .vote-count { margin: 0 5px; font-weight: normal; } /* Adjusted margin for badges */
 
   .comments-section { margin-top: 20px; }
-  .comment-form textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-  .comment-form input[type="submit"] { background-color: #5cb85c; color: white; padding: 8px 15px; border:none; border-radius:4px; cursor:pointer; }
-  .comment-form input[type="submit"]:hover { background-color: #4cae4c; }
-  
+  /* .comment-form textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; } */ /* Replaced by form-control */
+  /* .comment-form input[type="submit"] { background-color: #5cb85c; color: white; padding: 8px 15px; border:none; border-radius:4px; cursor:pointer; } */ /* Replaced by btn btn-success */
+  /* .comment-form input[type="submit"]:hover { background-color: #4cae4c; } */ /* Replaced by Bootstrap btn hover state */
+  .comments-section .card-header {
+      background-color: #f8f9fa; /* Light background for comment section header */
+  }
   /* Styles for _comment.html partial will be implicitly used here */
-  .comment-thread { list-style: none; padding-left: 0; }
+  /* .comment-thread { list-style: none; padding-left: 0; } */ /* Bootstrap list-group can be used */
   .comment-item { 
-    background-color: #f9f9f9; 
-    border: 1px solid #eee; 
-    border-radius: 4px; 
-    padding: 10px; 
-    margin-top: 10px; 
+    /* background-color: #f9f9f9; */ /* Bootstrap card/list-group-item can handle this */
+    /* border: 1px solid #eee; */ /* Bootstrap card/list-group-item can handle this */
+    /* border-radius: 4px; */ /* Bootstrap card/list-group-item can handle this */
+    /* padding: 10px; */ /* Bootstrap card/list-group-item can handle this */
+    /* margin-top: 10px; */ /* Bootstrap card/list-group-item can handle this */
   }
   .comment-author { font-weight: bold; }
   .comment-meta { font-size: 0.8em; color: #888; margin-bottom: 5px; }
   .comment-content { margin-bottom: 8px; }
-  .reply-link { font-size: 0.9em; color: #337ab7; cursor: pointer; }
+  .reply-link { font-size: 0.9em; /* color: #337ab7; */ cursor: pointer; } /* Bootstrap link class */
   .reply-form { margin-left: 20px; margin-top: 10px; display: none; /* Hidden by default */ }
 </style>
 
-<article class="post-content">
-  {{ post.content|safe }} {# Assuming content might be HTML or Markdown later #}
-</article>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h1 class="h2 mb-0">{{ post.title }}</h1>
+                    <p class="post-header-meta mb-0">
+                        Posted by 
+                        <a href="{{ url_for('user.profile', username=post.user.username) }}">{{ post.user.username }}</a>
+                        {% if post.subcommunity %}
+                        in <a href="{{ url_for('community.subcommunity_detail', subcommunity_identifier=post.subcommunity.id) }}">r/{{ post.subcommunity.name }}</a>
+                        {% endif %}
+                        <span class="mx-1">&bull;</span>
+                        {{ post.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                    </p>
+                </div>
+                <div class="card-body">
+                    <article class="post-body">
+                        {{ post.content|safe }} {# Assuming content might be HTML or Markdown later #}
+                    </article>
+                    <hr>
+                    <div class="post-actions d-flex justify-content-end align-items-center">
+                        <span class="text-muted mr-3">
+                            <span class="upvote-count">{{ post.upvotes }}</span> Upvotes, <span class="downvote-count">{{ post.downvotes }}</span> Downvotes
+                        </span>
+                        <div class="btn-group" role="group" aria-label="Voting buttons">
+                            <button class="btn btn-outline-success vote-btn upvote-btn {% if user_vote == 'upvote' %}active{% endif %}" data-post-id="{{ post.id }}" data-vote-type="upvote">
+                                <i class="fas fa-thumbs-up"></i> Upvote
+                            </button>
+                            <button class="btn btn-outline-danger vote-btn downvote-btn {% if user_vote == 'downvote' %}active{% endif %}" data-post-id="{{ post.id }}" data-vote-type="downvote">
+                                <i class="fas fa-thumbs-down"></i> Downvote
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<div class="post-actions">
-  <span class="vote-buttons">
-    <button class="vote-btn upvote-btn {% if user_vote == 'upvote' %}active{% endif %}" data-post-id="{{ post.id }}" data-vote-type="upvote">
-      &#x1F44D; <span class="upvote-count">{{ post.upvotes }}</span>
-    </button>
-    <button class="vote-btn downvote-btn {% if user_vote == 'downvote' %}active{% endif %}" data-post-id="{{ post.id }}" data-vote-type="downvote">
-      &#x1F44E; <span class="downvote-count">{{ post.downvotes }}</span>
-    </button>
-  </span>
+            <section class="comments-section mt-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h3 class="h5 mb-0">Comments <span class="badge badge-pill badge-secondary">{{ post.comment_count }}</span></h3>
+                    </div>
+                    <div class="card-body">
+                        {% if g.user %}
+                        <form action="{{ url_for('community.comment_on_post', post_id=post.id) }}" method="post" class="comment-form mb-4">
+                            <div class="form-group">
+                            <label for="text_content" class="sr-only">Leave a comment:</label>
+                            <textarea name="text_content" id="text_content" class="form-control" rows="3" placeholder="Share your thoughts..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                        </form>
+                        {% else %}
+                        <div class="alert alert-info text-center" role="alert">
+                            <a href="{{ url_for('auth.login', next=request.url) }}" class="alert-link">Log in</a> to leave a comment or reply.
+                        </div>
+                        {% endif %}
+
+                        {% if comments %}
+                        {# _comment.html partial will render the comments #}
+                        {% include 'partials/_comment.html' with context %}
+                        {% else %}
+                        <p class="text-muted text-center">No comments yet. Be the first to share your thoughts!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 </div>
-
-<section class="comments-section">
-  <h3>Comments ({{ post.comment_count }})</h3>
-  {% if g.user %}
-    <form action="{{ url_for('community.comment_on_post', post_id=post.id) }}" method="post" class="comment-form">
-      <div>
-        <label for="text_content">Leave a comment:</label>
-        <textarea name="text_content" id="text_content" rows="3" required></textarea>
-      </div>
-      <input type="submit" value="Post Comment">
-    </form>
-  {% else %}
-    <p><a href="{{ url_for('auth.login', next=request.url) }}">Log in</a> to leave a comment.</p>
-  {% endif %}
-
-  {% if comments %}
-    {% include 'partials/_comment.html' with context %} {# Pass current context for comments variable #}
-  {% else %}
-    <p>No comments yet. Be the first to share your thoughts!</p>
-  {% endif %}
-</section>
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
 <script>
-// JavaScript for post voting (can be moved to main.js if preferred and expanded)
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.vote-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const postId = this.dataset.postId;
-            const voteType = this.dataset.voteType;
-            const upvoteBtn = document.querySelector(`.upvote-btn[data-post-id='${postId}']`);
-            const downvoteBtn = document.querySelector(`.downvote-btn[data-post-id='${postId}']`);
-            const upvoteCountSpan = upvoteBtn.querySelector('.upvote-count');
-            const downvoteCountSpan = downvoteBtn.querySelector('.downvote-count');
-
-            fetch(`{{ url_for('community.vote_post', post_id=0) }}`.replace('0', postId) + '/vote', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    // Add CSRF token header if you're using Flask-WTF or similar
-                    // 'X-CSRFToken': '{{ csrf_token() }}' 
-                },
-                body: `vote_type=${voteType}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    upvoteCountSpan.textContent = data.upvotes;
-                    downvoteCountSpan.textContent = data.downvotes;
-                    
-                    // Update active state of buttons
-                    upvoteBtn.classList.remove('active');
-                    downvoteBtn.classList.remove('active');
-                    if (data.new_vote_status === 'upvote') {
-                        upvoteBtn.classList.add('active');
-                    } else if (data.new_vote_status === 'downvote') {
-                        downvoteBtn.classList.add('active');
-                    }
-                    // flash(data.message, 'success'); // Would need a JS flash message system
-                } else {
-                    // flash(data.message, 'error');
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while voting.');
-            });
-        });
-    });
-
-    // Basic reply form toggle
-    document.querySelectorAll('.reply-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetFormId = this.dataset.formTarget;
-            const form = document.getElementById(targetFormId);
-            if (form) {
-                form.style.display = form.style.display === 'none' ? 'block' : 'none';
-            }
-        });
-    });
-});
+// JavaScript for post voting and reply form toggle is expected to be in main.js
+// Ensure Font Awesome is linked in base.html if using fas fa-* icons
 </script>
 {% endblock %}

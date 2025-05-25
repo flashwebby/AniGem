@@ -3,76 +3,109 @@
 {% block title %}User Search{% endblock %}
 
 {% block header %}
-  <h1>Search for Users</h1>
+  {# Header content can be integrated into the main content area for better layout control #}
 {% endblock %}
 
 {% block content %}
 <style>
-  .search-form { margin-bottom: 20px; }
-  .search-results-list { list-style: none; padding: 0; }
-  .user-search-item { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    padding: 10px; 
-    border: 1px solid #eee; 
-    border-radius: 4px; 
-    margin-bottom: 10px;
-    background-color: #fff;
+  .user-search-card {
+    max-width: 700px;
+    margin: 2rem auto;
   }
-  .user-info { display: flex; align-items: center; }
-  .user-info img.avatar-small { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
-  .user-actions form { display: inline-block; margin-left: 5px;}
+  .user-search-item .user-info {
+    flex-grow: 1; /* Allow user info to take available space */
+  }
+  .user-search-item .avatar-small { 
+    width: 50px; 
+    height: 50px; 
+  }
+  .user-search-item .user-actions .btn,
+  .user-search-item .user-actions .badge {
+    min-width: 120px; /* Ensure buttons/badges have a minimum width for consistency */
+    text-align: center;
+  }
 </style>
 
-<form method="post" class="search-form">
-  <div class="form-group">
-    <label for="username_query">Enter Username:</label>
-    <input type="text" name="username_query" id="username_query" value="{{ query if query else '' }}" required>
-  </div>
-  <button type="submit" class="button">Search</button>
-</form>
+<div class="container mt-4">
+  <div class="card shadow-sm user-search-card">
+    <div class="card-header bg-light">
+      <h1 class="h3 mb-0">Search for Users</h1>
+    </div>
+    <div class="card-body">
+      <form method="post" class="search-form mb-4">
+        <div class="input-group">
+          <input type="text" name="username_query" id="username_query" class="form-control form-control-lg" value="{{ query if query else '' }}" placeholder="Enter username..." required>
+          <div class="input-group-append">
+            <button type="submit" class="btn btn-primary btn-lg">
+                {# <i class="fas fa-search"></i> #} <!-- Placeholder icon -->
+                Search
+            </button>
+          </div>
+        </div>
+      </form>
 
-{% if search_results %}
-  <h2>Search Results for "{{ query }}"</h2>
-  <ul class="search-results-list">
-    {% for user_result in search_results %}
-      <li class="user-search-item">
-        <div class="user-info">
-          <img src="{{ user_result.avatar_url if user_result.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ user_result.username }} avatar" class="avatar-small">
-          <a href="{{ url_for('user.profile', username=user_result.username) }}">{{ user_result.username }}</a>
-        </div>
-        <div class="user-actions">
-          {% if user_result.id != g.user.id %} {# Can't interact with self #}
-            {% if user_result.friendship_status == 'accepted' %}
-              <span class="text-muted">Already Friends</span>
-              <form action="{{ url_for('social.remove_friend_route', target_user_id=user_result.id) }}" method="post">
-                <button type="submit" class="button-sm button-danger">Remove Friend</button>
-              </form>
-            {% elif user_result.friendship_status == 'pending' %}
-              {# Could check who sent it, but for now, just "Pending" #}
-              <span class="text-muted">Request Pending</span>
-              {# Add cancel request if g.user sent it #}
-            {% elif user_result.friendship_status == 'blocked' %}
-              <span class="text-danger">Blocked</span>
-              {# Option to unblock if g.user blocked them #}
-              {# {% if user_result.blocked_by_current_user %} #} {# Needs more advanced status from DB #}
-              <form action="{{ url_for('social.unblock_user_route', target_user_id=user_result.id) }}" method="post">
-                  <button type="submit" class="button-sm button-warning">Unblock</button>
-              </form>
-              {# {% endif %} #}
-            {% else %} {# No existing relationship or they were rejected/unfriended #}
-              <form action="{{ url_for('social.send_request_route', target_user_id=user_result.id) }}" method="post">
-                <button type="submit" class="button-sm button-primary">Add Friend</button>
-              </form>
-            {% endif %}
-          {% endif %}
-        </div>
-      </li>
-    {% endfor %}
-  </ul>
-{% elif query %}
-  <p>No users found matching your exact query for "{{ query }}". Try a different username.</p>
-  <p><small>Note: Current search is exact. Partial username search will be implemented later.</small></p>
-{% endif %}
+      {% if search_results is defined %}
+        {% if search_results %}
+          <h4 class="mb-3">Search Results for "{{ query }}"</h4>
+          <div class="list-group search-results-list">
+            {% for user_result in search_results %}
+              <div class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-center user-search-item">
+                <div class="user-info d-flex align-items-center mb-2 mb-sm-0">
+                  <img src="{{ user_result.avatar_url if user_result.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ user_result.username }} avatar" class="avatar-small rounded-circle mr-3">
+                  <div>
+                    <h6 class="mb-0"><a href="{{ url_for('user.profile', username=user_result.username) }}">{{ user_result.username }}</a></h6>
+                    {# Optionally, add a small piece of info like join date or mutual friends placeholder #}
+                    {# <small class="text-muted">Joined: {{ user_result.created_at.strftime('%b %Y') }}</small> #}
+                  </div>
+                </div>
+                <div class="user-actions d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center" style="gap: 0.5rem;">
+                  <a href="{{ url_for('user.profile', username=user_result.username) }}" class="btn btn-outline-secondary btn-sm">View Profile</a>
+                  {% if user_result.id != g.user.id %}
+                    {% if user_result.friendship_status == 'accepted' %}
+                      <span class="badge badge-success p-2">Already Friends</span>
+                      {# <form action="{{ url_for('social.remove_friend_route', target_user_id=user_result.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                      </form> #}
+                    {% elif user_result.friendship_status == 'pending_sent_by_current_user' %}
+                      <span class="badge badge-info p-2">Request Sent</span>
+                       {# <form action="{{ url_for('social.cancel_request_route', target_user_id=user_result.id) }}" method="post" class="d-inline">
+                           <button type="submit" class="btn btn-warning btn-sm">Cancel</button>
+                       </form> #}
+                    {% elif user_result.friendship_status == 'pending_received_by_current_user' %}
+                       <form action="{{ url_for('social.accept_request_route', target_user_id=user_result.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-success btn-sm">Accept Request</button>
+                      </form>
+                      {# <form action="{{ url_for('social.reject_request_route', target_user_id=user_result.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                      </form> #}
+                    {% elif user_result.friendship_status == 'blocked_by_current_user' %}
+                      <span class="badge badge-danger p-2">You Blocked</span>
+                      {# <form action="{{ url_for('social.unblock_user_route', target_user_id=user_result.id) }}" method="post" class="d-inline">
+                          <button type="submit" class="btn btn-warning btn-sm">Unblock</button>
+                      </form> #}
+                    {% elif user_result.friendship_status == 'blocked_by_other_user' %}
+                        <span class="badge badge-secondary p-2">Blocked by User</span>
+                    {% else %}
+                      <form action="{{ url_for('social.send_request_route', target_user_id=user_result.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-primary btn-sm">Add Friend</button>
+                      </form>
+                    {% endif %}
+                  {% else %}
+                     <span class="badge badge-light p-2">This is you</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% elif query %}
+          <div class="alert alert-secondary text-center" role="alert">
+            No users found matching your query for "<strong>{{ query }}</strong>".
+          </div>
+        {% endif %}
+         {% if not query %}
+            <p class="text-muted text-center mt-3">Enter a username above to find users.</p>
+        {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock %}

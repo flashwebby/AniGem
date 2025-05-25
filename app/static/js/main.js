@@ -1,12 +1,18 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Spoiler reveal functionality
-    const spoilerButtons = document.querySelectorAll('.reveal-spoiler-btn');
-    spoilerButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const spoilerContent = this.previousElementSibling;
+    // Enhanced Spoiler reveal functionality
+    document.querySelectorAll('.reveal-spoiler-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const spoilerContent = this.previousElementSibling; // Expecting .spoiler-text to be immediately before the button
             if (spoilerContent && spoilerContent.classList.contains('spoiler-text')) {
-                spoilerContent.classList.remove('hidden-spoiler');
-                this.style.display = 'none'; // Hide the button after revealing
+                if (spoilerContent.classList.contains('hidden-spoiler')) {
+                    spoilerContent.classList.remove('hidden-spoiler');
+                    spoilerContent.classList.add('revealed');
+                    this.textContent = 'Hide Spoiler';
+                } else {
+                    spoilerContent.classList.add('hidden-spoiler');
+                    spoilerContent.classList.remove('revealed');
+                    this.textContent = 'Reveal Spoiler';
+                }
             }
         });
     });

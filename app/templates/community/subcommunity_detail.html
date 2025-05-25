@@ -3,48 +3,106 @@
 {% block title %}{{ subcommunity.name }} - Community{% endblock %}
 
 {% block header %}
-  <h1>r/{{ subcommunity.name }}</h1>
-  <p>{{ subcommunity.description }}</p>
-  <p><small>Created by {{ subcommunity.creator_username }} on {{ subcommunity.created_at.strftime('%Y-%m-%d') if subcommunity.created_at }}</small></p>
-  <a href="{{ url_for('community.create_post', subcommunity_id=subcommunity.id) }}" class="button">Submit New Post to r/{{ subcommunity.name }}</a>
+  {# Subcommunity header is now part of the main content block #}
 {% endblock %}
 
 {% block content %}
 <style>
-  .post-list { list-style: none; padding: 0; }
-  .post-item { 
-    background-color: #fff; 
-    border: 1px solid #ddd; 
-    border-radius: 4px; 
-    padding: 15px; 
-    margin-bottom: 15px; 
+  .subcommunity-header {
+    background-color: #e9ecef; /* Light grey background */
+    padding: 2rem 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: .3rem;
   }
-  .post-item h3 a { text-decoration: none; color: #337ab7; }
-  .post-item h3 a:hover { text-decoration: underline; }
-  .post-meta { font-size: 0.85em; color: #777; margin-top: 5px; }
-  .post-meta a { color: #777; }
+  .subcommunity-header h1 {
+    font-size: 2.75rem;
+    font-weight: 300;
+  }
+  .subcommunity-header .lead {
+    font-size: 1.1rem;
+    color: #495057;
+  }
+  .subcommunity-header .text-muted {
+    font-size: 0.9rem;
+  }
+  .post-card {
+    transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+  }
+  .post-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+  }
+  .post-meta { font-size: 0.85em; color: #6c757d; }
+  .post-meta a { color: #6c757d; }
   .post-meta a:hover { text-decoration: underline; }
+  .post-title-link {
+    color: #343a40;
+    text-decoration: none;
+  }
+  .post-title-link:hover {
+    color: #0056b3;
+  }
 </style>
 
-<h2>Posts in r/{{ subcommunity.name }}</h2>
-{% if posts %}
-  <ul class="post-list">
-    {% for post in posts %}
-      <li class="post-item">
-        <h3><a href="{{ url_for('community.post_detail', post_id=post.id) }}">{{ post.title }}</a></h3>
-        <p class="post-meta">
-          Posted by <a href="{{ url_for('user.profile', username=post.user.username) }}">{{ post.user.username }}</a> 
-          on {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
-        </p>
-        <p class="post-meta">
-          {{ post.upvotes }} Upvotes | {{ post.downvotes }} Downvotes | {{ post.comment_count }} Comments
-        </p>
-        {# Display a snippet of post content if available and desired #}
-        {# <p>{{ post.content|truncate(200) }}</p> #}
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No posts in this subcommunity yet. <a href="{{ url_for('community.create_post', subcommunity_id=subcommunity.id) }}">Be the first to submit one!</a></p>
-{% endif %}
+<div class="subcommunity-header">
+  <div class="container"> {# Optional: wrap in container for consistent padding with rest of page #}
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-1">r/{{ subcommunity.name }}</h1>
+            <p class="lead mb-2">{{ subcommunity.description }}</p>
+            <p class="text-muted mb-0">Created by {{ subcommunity.creator_username }} on {{ subcommunity.created_at.strftime('%Y-%m-%d') if subcommunity.created_at }}</p>
+        </div>
+        <div class="col-md-4 text-md-right mt-3 mt-md-0">
+            <a href="{{ url_for('community.create_post', subcommunity_id=subcommunity.id) }}" class="btn btn-primary btn-lg shadow-sm">
+                {# <i class="fas fa-plus-circle mr-1"></i> #} <!-- Font Awesome icon placeholder -->
+                Create New Post
+            </a>
+        </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+    <h2 class="mb-3">Posts in r/{{ subcommunity.name }}</h2>
+    {% if posts %}
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-md-12 mb-3">
+            <div class="card post-card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{{ url_for('community.post_detail', post_id=post.id) }}" class="post-title-link">{{ post.title }}</a>
+                    </h5>
+                    <p class="card-text post-meta">
+                        Posted by <a href="{{ url_for('user.profile', username=post.user.username) }}">{{ post.user.username }}</a>
+                        <span class="mx-1">&bull;</span>
+                        <small>{{ post.created_at.strftime('%b %d, %Y at %I:%M %p') }}</small>
+                    </p>
+                    {# Optional: Display a snippet of post content #}
+                    {# <p class="card-text">{{ post.content|striptags|truncate(150) }}</p> #}
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div>
+                            <span class="badge badge-success mr-1">{{ post.upvotes }} Upvotes</span>
+                            <span class="badge badge-danger mr-1">{{ post.downvotes }} Downvotes</span>
+                            <span class="badge badge-info">{{ post.comment_count }} Comments</span>
+                        </div>
+                        <a href="{{ url_for('community.post_detail', post_id=post.id) }}" class="btn btn-sm btn-outline-primary">View Discussion</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-light text-center" role="alert">
+        <h4 class="alert-heading">It's quiet in here...</h4>
+        <p>No posts in this subcommunity yet. Why not be the first to share something interesting?</p>
+        <hr>
+        <a href="{{ url_for('community.create_post', subcommunity_id=subcommunity.id) }}" class="btn btn-success">
+            {# <i class="fas fa-pencil-alt mr-1"></i> #} <!-- Font Awesome icon placeholder -->
+            Submit a New Post
+        </a>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

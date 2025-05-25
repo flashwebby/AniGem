@@ -3,41 +3,78 @@
 {% block title %}Anime List{% endblock %}
 
 {% block header %}
-  <h2>Anime Collection</h2>
-  <a href="{{ url_for('anime.surprise_me') }}" class="button surprise-button">Surprise Me!</a>
-  {# Optional: Link to add anime page #}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Anime Collection</h2>
+    <a href="{{ url_for('anime.surprise_me') }}" class="btn btn-success surprise-button">Surprise Me!</a>
+  </div>
+  {# Optional: Link to add anime page - Assuming admin check is handled elsewhere or this is a general feature now #}
   {# {% if g.user and g.user.is_admin %} #}
-  {# <a href="{{ url_for('anime.add_anime_route') }}">Add New Anime</a> #}
+  {# <a href="{{ url_for('anime.add_anime_route') }}" class="btn btn-primary mb-3">Add New Anime</a> #}
   {# {% endif %} #}
 {% endblock %}
 
 {% block content %}
   <style>
-    .filters { margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 4px; }
-    .filters form { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
-    .filters label { font-weight: normal; margin-right: 5px; font-size: 0.9em; }
-    .filters select, .filters input[type="text"] { 
+    .filters-card {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      padding: 1rem;
+      border-radius: .3rem;
+    }
+    .filters-card .form-group label {
+        font-weight: 500; /* Slightly bolder labels */
+    }
+    .filters-card .btn-primary {
+        background-color: #0069d9; /* A slightly darker blue for filter button */
+        border-color: #0062cc;
+    }
+    .surprise-button {
+        font-size: 1.1rem; /* Slightly larger text */
+        padding: 0.5rem 1rem; /* More padding */
+        /* Adding a subtle animation or icon could be done with more CSS/JS */
+    }
+    /* .filters { margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 4px; } */ /* Handled by Bootstrap card */
+    /* .filters form { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; } */ /* Handled by Bootstrap form-row/form-group */
+    /* .filters label { font-weight: normal; margin-right: 5px; font-size: 0.9em; } */ /* Handled by Bootstrap form-label */
+    /* .filters select, .filters input[type="text"] { 
         padding: 8px; 
         border-radius: 4px; 
         border: 1px solid #ddd; 
         font-size: 0.9em;
-    }
-    .filters input[type="submit"] { 
+    } */ /* Handled by Bootstrap form-control */
+    /* .filters input[type="submit"] { 
         padding: 8px 15px; 
         background-color: #337ab7; 
         color: white; border: none; 
         border-radius: 4px; cursor: pointer; 
         font-size: 0.9em;
-    }
-    .filters input[type="submit"]:hover { background-color: #286090; }
-    .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-    .anime-card { border: 1px solid #ddd; border-radius: 4px; padding: 15px; background-color: #fff; text-align: center; }
-    .anime-card img { max-width: 100%; height: auto; max-height: 250px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; }
-    .anime-card h3 { font-size: 1.1em; margin: 0.5em 0; }
-    .anime-card h3 a { text-decoration: none; color: #333; }
-    .anime-card h3 a:hover { color: #007bff; }
+    } */ /* Handled by Bootstrap btn */
+    /* .filters input[type="submit"]:hover { background-color: #286090; } */ /* Handled by Bootstrap btn */
+    /* .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; } */ /* Replaced with Bootstrap row and col classes */
+    .anime-card { /* border: 1px solid #ddd; border-radius: 4px; padding: 15px; background-color: #fff; text-align: center; */ } /* Handled by Bootstrap card */
+    .anime-card img { /* max-width: 100%; height: auto; max-height: 250px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; */ } /* Handled by Bootstrap card-img-top */
+    .anime-card .card-title a { font-size: 1.1em; margin: 0.5em 0; color: #212529; text-decoration: none;}
+    .anime-card .card-title a:hover { color: #0056b3; }
     .anime-card p { font-size: 0.9em; color: #666; margin-bottom: 5px;}
-    .surprise-button { 
+    .anime-card .badge {
+        font-size: 0.75em; /* Smaller badges */
+    }
+    .anime-card .btn-outline-primary {
+        font-size: 0.85em; /* Smaller button text */
+        padding: .25rem .5rem; /* Smaller button padding */
+    }
+    .anime-card .card-synopsis {
+        font-size: 0.8rem; /* Smaller text for synopsis */
+        height: 3.6em; /* Approx 3 lines, (0.8rem * 1.5 line-height * 3 lines) */
+        line-height: 1.2em; /* Tighter line height for synopsis */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        /* For webkit browsers, to show ellipsis after 3 lines */
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+    /* .surprise-button { 
         display: inline-block; 
         padding: 10px 15px; 
         background-color: #28a745; 
@@ -46,75 +83,136 @@
         border-radius: 5px;
         font-size: 1em;
         margin-left: 20px; 
-    }
-    .surprise-button:hover { background-color: #218838; }
+    } */ /* Handled by Bootstrap btn btn-success */
+    /* .surprise-button:hover { background-color: #218838; } */ /* Handled by Bootstrap btn */
     .no-anime { text-align: center; padding: 20px; color: #777; }
+    .card-img-top-container {
+        width: 100%;
+        padding-top: 140%; /* Aspect ratio for images e.g. 10:7 for portrait */
+        position: relative;
+        overflow: hidden;
+    }
+    .card-img-top-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Cover ensures the image fills the container, cropping if necessary */
+    }
   </style>
 
-  <div class="filters">
-    <form method="get" action="{{ url_for('anime.list_anime') }}">
-      <div>
-        <label for="genre_id">Genre:</label>
-        <select name="genre_id" id="genre_id">
-          <option value="">All Genres</option>
-          {% for genre in genres %}
-            <option value="{{ genre.id }}" {% if genre.id == selected_genre_id %}selected{% endif %}>{{ genre.name }}</option>
-          {% endfor %}
-        </select>
+  <div class="mb-4 filters-card">
+    <h5 class="mb-3">Refine Results</h5>
+    <form method="get" action="{{ url_for('anime.list_anime') }}" id="filterSortForm">
+      <div class="form-row">
+        <div class="form-group col-md-6 col-lg-2">
+          <label for="genre_id">Genre</label>
+          <select name="genre_id" id="genre_id" class="form-control form-control-sm custom-select custom-select-sm">
+            <option value="">All Genres</option>
+            {% for genre in genres %}
+              <option value="{{ genre.id }}" {% if genre.id|string == request.args.get('genre_id') %}selected{% endif %}>{{ genre.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group col-md-6 col-lg-2">
+          <label for="tag_id">Tag</label>
+          <select name="tag_id" id="tag_id" class="form-control form-control-sm custom-select custom-select-sm">
+            <option value="">All Tags</option>
+            {% for tag in tags %}
+              <option value="{{ tag.id }}" {% if tag.id|string == request.args.get('tag_id') %}selected{% endif %}>{{ tag.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group col-md-4 col-lg-2">
+          <label for="release_year">Year</label>
+          <select name="release_year" id="release_year" class="form-control form-control-sm custom-select custom-select-sm">
+            <option value="">All Years</option>
+            {% for year in available_years %}
+              <option value="{{ year }}" {% if year|string == request.args.get('release_year') %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group col-md-4 col-lg-2">
+          <label for="language">Language</label>
+          <select name="language" id="language" class="form-control form-control-sm custom-select custom-select-sm">
+            <option value="all"{% if request.args.get('language') == 'all' %}selected{% endif %}>All Languages</option>
+            {% for lang in available_languages %}
+              <option value="{{ lang }}" {% if lang == request.args.get('language') %}selected{% endif %}>{{ lang }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group col-md-4 col-lg-2">
+          <label for="sort_by">Sort By</label>
+          <select name="sort_by" id="sort_by" class="form-control form-control-sm custom-select custom-select-sm">
+            <option value="title_asc" {% if request.args.get('sort_by') == 'title_asc' %}selected{% endif %}>Title (A-Z)</option>
+            <option value="title_desc" {% if request.args.get('sort_by') == 'title_desc' %}selected{% endif %}>Title (Z-A)</option>
+            <option value="rating_desc" {% if request.args.get('sort_by') == 'rating_desc' %}selected{% endif %}>Rating (High-Low)</option>
+            <option value="rating_asc" {% if request.args.get('sort_by') == 'rating_asc' %}selected{% endif %}>Rating (Low-High)</option>
+            <option value="release_year_desc" {% if request.args.get('sort_by') == 'release_year_desc' %}selected{% endif %}>Year (New-Old)</option>
+            <option value="release_year_asc" {% if request.args.get('sort_by') == 'release_year_asc' %}selected{% endif %}>Year (Old-New)</option>
+          </select>
+        </div>
+        <div class="form-group col-lg-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary btn-sm btn-block">Apply</button>
+        </div>
       </div>
-      <div>
-        <label for="tag_id">Tag:</label>
-        <select name="tag_id" id="tag_id">
-          <option value="">All Tags</option>
-          {% for tag in tags %}
-            <option value="{{ tag.id }}" {% if tag.id == selected_tag_id %}selected{% endif %}>{{ tag.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label for="release_year">Year:</label>
-        <select name="release_year" id="release_year">
-          <option value="">All Years</option>
-          {% for year in available_years %}
-            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label for="language">Language:</label>
-        <select name="language" id="language">
-          <option value="all">All Languages</option>
-          {% for lang in available_languages %}
-            <option value="{{ lang }}" {% if lang == selected_language %}selected{% endif %}>{{ lang }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <input type="submit" value="Filter">
     </form>
   </div>
 
   {% if anime_list %}
-    <div class="anime-grid">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
       {% for anime_item in anime_list %}
-        <div class="anime-card">
-          <a href="{{ url_for('anime.detail', anime_id=anime_item.id) }}">
-            <img src="{{ anime_item.cover_image_url if anime_item.cover_image_url else url_for('static', filename='images/default_cover.png') }}" alt="{{ anime_item.title }} cover">
-            <h3>{{ anime_item.title }}</h3>
-          </a>
-          <p>Year: {{ anime_item.release_year if anime_item.release_year else 'N/A' }}</p>
-          <p>Rating: {{ "%.1f"|format(anime_item.average_rating) if anime_item.average_rating else 'N/A' }}</p>
-          <p>
-            Genres: 
-            {% for genre in anime_item.genres %}
-              {{ genre.name }}{% if not loop.last %}, {% endif %}
-            {% else %}
-              N/A
-            {% endfor %}
-          </p>
+        <div class="col mb-4">
+          <div class="card h-100 shadow-sm anime-card">
+            <a href="{{ url_for('anime.detail', anime_id=anime_item.id) }}">
+              <div class="card-img-top-container">
+                <img src="{{ anime_item.cover_image_url if anime_item.cover_image_url else url_for('static', filename='images/default_cover.png') }}" alt="{{ anime_item.title }} cover" class="card-img-top">
+              </div>
+            </a>
+            <div class="card-body d-flex flex-column p-3">
+              <h6 class="card-title mb-1">
+                <a href="{{ url_for('anime.detail', anime_id=anime_item.id) }}">{{ anime_item.title|truncate(45) }}</a>
+              </h6>
+              {% if anime_item.description %}
+              <p class="card-text text-muted small card-synopsis mb-2">
+                {{ anime_item.description|striptags|truncate(80) }}
+              </p>
+              {% endif %}
+              <p class="card-text text-muted small mb-1">Year: {{ anime_item.release_year if anime_item.release_year else 'N/A' }}</p>
+              <p class="card-text text-muted small mb-2">Rating: 
+                <span class="badge badge-warning">{{ "%.1f"|format(anime_item.average_rating) if anime_item.average_rating else 'N/A' }}</span>
+              </p>
+              <div class="mb-2">
+                {% for genre in anime_item.genres|slice:":2" %} {# Show max 2 genres for brevity #}
+                  <span class="badge badge-secondary mr-1">{{ genre.name }}</span>
+                {% endfor %}
+                {% if anime_item.genres|length > 2 %}<span class="badge badge-secondary">...</span>{% endif %}
+              </div>
+              <a href="{{ url_for('anime.detail', anime_id=anime_item.id) }}" class="btn btn-outline-primary btn-sm mt-auto">View Details</a>
+            </div>
+          </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p class="no-anime">No anime found matching your criteria. Try broadening your search or <a href="{{ url_for('anime.list_anime') }}">view all anime</a>.</p>
+    <div class="alert alert-info no-anime" role="alert">
+      No anime found matching your criteria. Try broadening your search or <a href="{{ url_for('anime.list_anime') }}" class="alert-link">view all anime</a>.
+    </div>
   {% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sortBySelect = document.getElementById('sort_by');
+    const filterSortForm = document.getElementById('filterSortForm');
+    if (sortBySelect && filterSortForm) {
+      sortBySelect.addEventListener('change', function() {
+        filterSortForm.submit();
+      });
+    }
+  });
+</script>
 {% endblock %}

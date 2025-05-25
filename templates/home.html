@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Your Anime Platform!{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .hero-section {
+    background: url('{{ url_for('static', filename='images/hero_background.jpg') }}') no-repeat center center;
+    background-size: cover;
+    color: white;
+    padding: 5rem 1rem;
+    text-align: center;
+    margin-bottom: 2rem; /* Add some space below the hero */
+  }
+  .hero-section .display-4 {
+    font-weight: 300;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  }
+  .hero-section .lead {
+    font-size: 1.5rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+  .section-title {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .anime-card-placeholder {
+    height: 350px; /* Adjust as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9ecef;
+    border-radius: .25rem;
+    text-align: center;
+  }
+  .anime-card-placeholder .card-title {
+      font-size: 1.25rem;
+      color: #6c757d;
+  }
+  .anime-card-placeholder .card-text {
+      font-size: 0.9rem;
+      color: #6c757d;
+  }
+</style>
+{% endblock %}
+
+{% block header %}{# Override base.html header to have full-width hero #}{% endblock %}
+
+{% block content %}
+<div class="hero-section jumbotron">
+  <div class="container">
+    <h1 class="display-4">Discover Hidden Anime Gems</h1>
+    <p class="lead">Explore a vast collection of anime, share your reviews, and connect with fellow fans.</p>
+    <a href="{{ url_for('anime.list_anime') }}" class="btn btn-primary btn-lg mt-3">Explore Anime &raquo;</a>
+    <a href="{{ url_for('community.home') }}" class="btn btn-info btn-lg mt-3">Join the Community &raquo;</a>
+  </div>
+</div>
+
+<div class="container">
+  <section id="featured-anime" class="my-5">
+    <h2 class="section-title">Featured Anime</h2>
+    <div class="row">
+      <!-- Placeholder for featured anime - loop through actual data later -->
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+          <div class="anime-card-placeholder">
+            <div>
+                <h5 class="card-title">Featured Anime 1</h5>
+                <p class="card-text">A short description of the anime.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-text">This is a placeholder for a featured anime. Details will be populated dynamically.</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="btn-group">
+                <a href="#" class="btn btn-sm btn-outline-secondary">View</a>
+                {# <a href="#" class="btn btn-sm btn-outline-secondary">Add to List</a> #}
+              </div>
+              <small class="text-muted">Rating: 8.5/10</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+          <div class="anime-card-placeholder">
+            <div>
+                <h5 class="card-title">Featured Anime 2</h5>
+                <p class="card-text">Another great series to check out.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-text">This is another placeholder. Imagine a cool anime cover and details here!</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="btn-group">
+                <a href="#" class="btn btn-sm btn-outline-secondary">View</a>
+                {# <a href="#" class="btn btn-sm btn-outline-secondary">Add to List</a> #}
+              </div>
+              <small class="text-muted">Rating: 9.2/10</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+          <div class="anime-card-placeholder">
+            <div>
+                <h5 class="card-title">Featured Anime 3</h5>
+                <p class="card-text">Don't miss this exciting adventure!</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-text">Placeholder content for the third featured anime. Dynamic content coming soon.</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="btn-group">
+                <a href="#" class="btn btn-sm btn-outline-secondary">View</a>
+                {# <a href="#" class="btn btn-sm btn-outline-secondary">Add to List</a> #}
+              </div>
+              <small class="text-muted">Rating: 8.9/10</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="new-releases" class="my-5">
+    <h2 class="section-title">New Releases</h2>
+    <div class="row">
+      <!-- Placeholder for new releases -->
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card shadow-sm">
+          <div class="anime-card-placeholder">
+             <div>
+                <h5 class="card-title">New Release 1</h5>
+             </div>
+          </div>
+          <div class="card-body">
+            <p class="card-text small">Briefly describe this newly released anime. Air date: Oct 2024.</p>
+             <a href="#" class="btn btn-sm btn-outline-primary btn-block">More Info</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card shadow-sm">
+           <div class="anime-card-placeholder">
+             <div>
+                <h5 class="card-title">New Release 2</h5>
+             </div>
+          </div>
+          <div class="card-body">
+            <p class="card-text small">Another fresh series just out. Air date: Oct 2024.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary btn-block">More Info</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card shadow-sm">
+          <div class="anime-card-placeholder">
+             <div>
+                <h5 class="card-title">New Release 3</h5>
+             </div>
+          </div>
+          <div class="card-body">
+            <p class="card-text small">Exciting new show available now. Air date: Sep 2024.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary btn-block">More Info</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card shadow-sm">
+           <div class="anime-card-placeholder">
+             <div>
+                <h5 class="card-title">New Release 4</h5>
+             </div>
+          </div>
+          <div class="card-body">
+            <p class="card-text small">Check out the latest addition. Air date: Sep 2024.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary btn-block">More Info</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="popular-this-week" class="my-5">
+      <h2 class="section-title">Popular This Week</h2>
+      {# Similar structure to featured or new releases, using cards #}
+      <div class="alert alert-info" role="alert">
+          Popular anime section coming soon!
+      </div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{# Add any page-specific JavaScript here if needed in the future #}
+{% endblock %}
