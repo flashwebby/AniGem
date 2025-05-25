@@ -3,7 +3,6 @@
 {% block title %}{{ anime.title }}{% endblock %}
 
 {% block header %}
-  {# Header content is now part of the main content area for better layout control #}
 {% endblock %}
 
 {% block content %}
@@ -68,6 +67,9 @@
   </style>
 
   <div class="container mt-4">
+    {# General Flash Message Container #}
+    <div id="flash-message-container" class="mb-3"></div>
+
     <div class="row">
       <div class="col-md-4 text-center text-md-left">
         <img src="{{ anime.cover_image_url if anime.cover_image_url else url_for('static', filename='images/default_cover.png') }}" 
@@ -79,7 +81,7 @@
             <p><strong>Release Year:</strong> {{ anime.release_year if anime.release_year else 'N/A' }}</p>
             <p><strong>Language:</strong> {{ anime.language if anime.language else 'N/A' }}</p>
             <p><strong>Average Rating:</strong> 
-            <span class="badge badge-warning p-2" style="font-size: 1rem;">
+            <span id="average-rating" class="badge badge-warning p-2" style="font-size: 1rem;">
                 {{ "%.1f"|format(anime.average_rating) if anime.average_rating else 'Not Rated' }} / 10
             </span>
             </p>
@@ -122,20 +124,24 @@
           <div class="card-body">
             <h4 class="card-title">Rate this Anime</h4>
             {% if g.user %}
-              <form action="{{ url_for('ratings_reviews.rate_anime', anime_id=anime.id) }}" method="post" class="rating-form text-center">
+              <form id="rating-form" action="{{ url_for('ratings_reviews.rate_anime', anime_id=anime.id) }}" method="post" class="rating-form text-center">
                 <div class="star-rating mb-2">
                   {% for i in range(10, 0, -1) %}
-                    <input type="radio" id="star{{i}}" name="score" value="{{i}}" {% if current_user_rating and current_user_rating.score == i %}checked{% endif %}>
+                    <input type="radio" id="star{{i}}" name="score" value="{{i}}" 
+                           {% if current_user_rating and current_user_rating.score == i %}checked{% endif %}
+                           data-current-rating="{{ current_user_rating.score if current_user_rating else '' }}">
                     <label for="star{{i}}" title="{{i}} stars">&#9733;</label>
                   {% endfor %}
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Submit Rating</button>
+                 <button type="submit" class="btn btn-primary btn-block">Submit Rating</button> 
               </form>
-              {% if current_user_rating %}
-                <p class="text-center mt-2">Your current rating: {{ current_user_rating.score }}/10</p>
-              {% else %}
-                <p class="text-center mt-2 text-muted">You have not rated this anime yet.</p>
-              {% endif %}
+              <div id="user-current-rating" class="text-center mt-2">
+                {% if current_user_rating %}
+                  <p>Your current rating: {{ current_user_rating.score }}/10</p>
+                {% else %}
+                  <p class="text-muted">You have not rated this anime yet.</p>
+                {% endif %}
+              </div>
             {% else %}
               <p class="text-center"><a href="{{ url_for('auth.login', next=request.url) }}" class="btn btn-outline-primary">Log in to rate this anime</a></p>
             {% endif %}
@@ -147,14 +153,14 @@
           <div class="card-body">
             <h4 class="card-title">Submit a Review</h4>
             {% if g.user %}
-              <form action="{{ url_for('ratings_reviews.review_anime', anime_id=anime.id) }}" method="post" class="review-form">
+              <form id="review-form" action="{{ url_for('ratings_reviews.review_anime', anime_id=anime.id) }}" method="post" class="review-form">
                 <div class="form-group">
-                  <label for="text_content" class="sr-only">Your Review:</label>
-                  <textarea name="text_content" id="text_content" class="form-control" rows="3" placeholder="Write your review..." required></textarea>
+                  <label for="review-text-content" class="sr-only">Your Review:</label>
+                  <textarea name="text_content" id="review-text-content" class="form-control" rows="3" placeholder="Write your review..." required></textarea>
                 </div>
                 <div class="form-group form-check">
-                  <input type="checkbox" name="is_spoiler" id="is_spoiler" class="form-check-input">
-                  <label for="is_spoiler" class="form-check-label">This review contains spoilers</label>
+                  <input type="checkbox" name="is_spoiler" id="review-is-spoiler" class="form-check-input">
+                  <label for="review-is-spoiler" class="form-check-label">This review contains spoilers</label>
                 </div>
                 <button type="submit" class="btn btn-success btn-block">Post Review</button>
               </form>
@@ -169,11 +175,11 @@
     <div class="section-divider"></div>
 
     <h3 class="mb-3">User Reviews</h3>
-    {% if reviews %}
-      <div class="review-list"> {# No longer a ul, individual review-items are cards/divs #}
-        {% for review in reviews %}
-          <div class="review-item card mb-3">
-            <div class="card-body">
+    <div id="review-list-container">
+        {% if reviews %}
+            {% for review in reviews %}
+            <div class="review-item card mb-3" id="review-{{ review.id }}">
+                <div class="card-body">
                 <div class="review-author d-flex align-items-center mb-2">
                 <img src="{{ review.user.avatar_url if review.user.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ review.user.username }} avatar" class="rounded-circle mr-2 avatar-small">
                 <div>
@@ -195,30 +201,28 @@
                 {% endif %}
                 </div>
                 <div class="review-actions text-right">
-                <form action="{{ url_for('ratings_reviews.vote_review', review_id=review.id) }}" method="post" class="d-inline">
-                    <input type="hidden" name="vote_type" value="upvote">
+                <form class="d-inline vote-form" data-review-id="{{ review.id }}" data-vote-type="upvote">
                     <button type="submit" class="btn btn-outline-success btn-sm vote-btn upvote {% if user_votes and user_votes[review.id] == 'upvote' %}active{% endif %}">
-                        &#x1F44D; <span class="badge badge-light">{{ review.upvotes }}</span>
+                        &#x1F44D; <span class="upvote-count">{{ review.upvotes }}</span>
                     </button>
                 </form>
-                <form action="{{ url_for('ratings_reviews.vote_review', review_id=review.id) }}" method="post" class="d-inline ml-1">
-                    <input type="hidden" name="vote_type" value="downvote">
+                <form class="d-inline ml-1 vote-form" data-review-id="{{ review.id }}" data-vote-type="downvote">
                     <button type="submit" class="btn btn-outline-danger btn-sm vote-btn downvote {% if user_votes and user_votes[review.id] == 'downvote' %}active{% endif %}">
-                        &#x1F44E; <span class="badge badge-light">{{ review.downvotes }}</span>
+                        &#x1F44E; <span class="downvote-count">{{ review.downvotes }}</span>
                     </button>
                 </form>
                 </div>
             </div>
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="alert alert-info" role="alert">
-        No reviews yet for this anime. Be the first to write one!
-      </div>
-    {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div id="no-reviews-message" class="alert alert-info" role="alert">
+            No reviews yet for this anime. Be the first to write one!
+        </div>
+        {% endif %}
+    </div> {# End review-list-container #}
 
-    {# Simple Pagination Placeholder for Reviews #}
+    {# Simple Pagination Placeholder for Reviews - to be made dynamic if time permits #}
     {% if reviews and reviews|length > 5 %} {# Example: Show pagination if more than 5 reviews #}
     <nav aria-label="Review navigation" class="mt-4">
       <ul class="pagination justify-content-center">
@@ -234,30 +238,13 @@
       <a href="{{ url_for('anime.list_anime') }}" class="btn btn-secondary">&laquo; Back to Anime List</a>
     </div>
   </div>
-  {# Spoiler toggle script is now expected in main.js #}
 {% endblock %}
 
-{% block styles %} {# Add specific styles for ratings and reviews #}
+{% block styles %}
 {{ super() }}
 <style>
-  /* Moved specific star rating styles to main content block style tag for better organization */
-  /* .review-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 8px; border-radius: 3px; border: 1px solid #ccc;} */ /* Handled by form-control */
-  /* .review-form input[type="checkbox"] { margin-right: 5px; } */ /* Handled by form-check-input */
-  
-  /* .review-list { list-style: none; padding: 0; } */ /* Using divs now */
-  /* .review-item { margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 4px; background-color: #f9f9f9; } */ /* Replaced by card */
-  .review-author .avatar-small { width: 30px; height: 30px; /* border-radius: 50%; */ /* margin-right: 8px; vertical-align: middle; */ } /* Handled by Bootstrap classes */
-  .review-rating-score { font-weight: bold; } /* Make user's rating in review more prominent */
-  /* .review-author strong { font-size: 1.1em; } */
-  /* .review-rating-score { font-size: 0.9em; color: #777; } */
-  /* .review-timestamp { font-size: 0.8em; color: #999; } */
-  
-  /* .review-content .spoiler-text.hidden-spoiler:hover::after {
-    content: " (Click to reveal)";
-    font-style: italic;
-    font-size: 0.9em;
-  } */ /* JS will handle reveal text now */
-  
+  .review-author .avatar-small { width: 30px; height: 30px; }
+  .review-rating-score { font-weight: bold; }
   .vote-btn span { margin-left: 3px; }
 </style>
 {% endblock %}

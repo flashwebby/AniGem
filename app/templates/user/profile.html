@@ -7,7 +7,6 @@
     <img src="{{ user.avatar_url if user.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ user.username }} avatar" class="img-thumbnail rounded-circle mr-3" style="width: 120px; height: 120px; object-fit: cover;">
     <div>
       <h1 class="display-4">{{ user.username }}</h1>
-      {# Placeholder for user bio or status if available #}
       <p class="text-muted lead">
         {{ user.bio if user.bio else "User has not set a bio yet." }}
       </p>
@@ -28,16 +27,15 @@
         <li class="list-group-item"><strong>Member Since:</strong> {{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</li>
         <li class="list-group-item"><strong>Last Login:</strong> {{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</li>
       </ul>
-      {# Optionally, add links to edit profile, change password, etc. #}
       {% if g.user and g.user.id == user.id %}
       <div class="card-body text-center">
-        <a href="#" class="btn btn-primary mr-2">Edit Profile</a> {# Placeholder for edit profile link #}
-        <a href="#" class="btn btn-outline-secondary">Change Password</a> {# Placeholder for change password link #}
+        <a href="#" class="btn btn-primary mr-2">Edit Profile</a>
+        <a href="#" class="btn btn-outline-secondary">Change Password</a>
       </div>
       {% endif %}
     </div>
 
-    {% if user.id != g.user.id %} {# Actions for viewing other users' profiles #}
+    {% if user.id != g.user.id %}
     <div class="card mb-4">
         <div class="card-header">Actions</div>
         <div class="card-body">
@@ -100,12 +98,11 @@
             <a class="nav-link" id="completed-tab" data-toggle="tab" href="#completed" role="tab" aria-controls="completed" aria-selected="false">Completed</a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="bookmarked-tab" data-toggle="tab" href="#bookmarked" role="tab" aria-controls="bookmarked" aria-selected="false">Bookmarked</a> {# Assuming 'bookmarked' is a distinct status/list #}
+            <a class="nav-link" id="bookmarked-tab" data-toggle="tab" href="#bookmarked" role="tab" aria-controls="bookmarked" aria-selected="false">Bookmarked</a>
           </li>
         </ul>
 
         <div class="tab-content" id="watchlistTabsContent">
-          {# Currently Watching Tab #}
           <div class="tab-pane fade show active" id="watching" role="tabpanel" aria-labelledby="watching-tab">
             {% set watching_list = watchlist_items|selectattr("status", "equalto", "watching")|list %}
             {% if watching_list %}
@@ -139,7 +136,6 @@
             {% endif %}
           </div>
 
-          {# Plan to Watch Tab #}
           <div class="tab-pane fade" id="plan-to-watch" role="tabpanel" aria-labelledby="plan-to-watch-tab">
             {% set plan_to_watch_list = watchlist_items|selectattr("status", "equalto", "plan_to_watch")|list %}
             {% if plan_to_watch_list %}
@@ -173,7 +169,6 @@
             {% endif %}
           </div>
 
-          {# Completed Tab #}
           <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
             {% set completed_list = watchlist_items|selectattr("status", "equalto", "completed")|list %}
             {% if completed_list %}
@@ -207,7 +202,6 @@
             {% endif %}
           </div>
           
-          {# Bookmarked Tab #}
           <div class="tab-pane fade" id="bookmarked" role="tabpanel" aria-labelledby="bookmarked-tab">
             {% set bookmarked_list = watchlist_items|selectattr("status", "equalto", "bookmarked")|list %}
             {% if bookmarked_list %}
@@ -241,7 +235,7 @@
             {% endif %}
           </div>
         </div>
-        {% if g.user and g.user.id == user.id and False %} {# Manage button, hidden for now as functionality isn't primary focus #}
+        {% if g.user and g.user.id == user.id and False %} 
         <div class="text-center mt-3">
              <a href="#" class="btn btn-outline-primary btn-sm">Manage All My Lists</a>
         </div>
@@ -260,25 +254,24 @@
                         <div class="d-flex w-100 justify-content-between">
                             <p class="mb-1">
                                 {% if activity.type == 'watchlist_add' or activity.type == 'watchlist_update' %}
-                                    <i class="fas fa-list-alt mr-2 text-primary"></i><!-- Placeholder icon -->
+                                    <i class="fas fa-list-alt mr-2 text-primary"></i>
                                     {{ activity.user.username }} {{ activity.details.status|replace('_', ' ')|title }} <strong>{{ activity.details.anime_title }}</strong>.
                                 {% elif activity.type == 'new_review' %}
-                                    <i class="fas fa-star mr-2 text-warning"></i><!-- Placeholder icon -->
+                                    <i class="fas fa-star mr-2 text-warning"></i>
                                     {{ activity.user.username }} wrote a review for <strong>{{ activity.details.anime_title }}</strong>.
                                 {% elif activity.type == 'new_post' %}
-                                    <i class="fas fa-comments mr-2 text-info"></i><!-- Placeholder icon -->
+                                    <i class="fas fa-comments mr-2 text-info"></i>
                                     {{ activity.user.username }} created a post: <strong>{{ activity.details.post_title }}</strong>.
                                 {% elif activity.type == 'new_comment' %}
-                                    <i class="fas fa-comment mr-2 text-success"></i><!-- Placeholder icon -->
+                                    <i class="fas fa-comment mr-2 text-success"></i>
                                      {{ activity.user.username }} commented on <strong>{{ activity.details.post_title }}</strong>.
                                 {% else %}
-                                    <i class="fas fa-info-circle mr-2 text-muted"></i><!-- Placeholder icon -->
+                                    <i class="fas fa-info-circle mr-2 text-muted"></i>
                                     {{ activity.user.username }} {{ activity.content }}.
                                 {% endif %}
                             </p>
                             <small class="text-muted">{{ activity.created_at.strftime('%b %d, %Y') }}</small>
                         </div>
-                        {# <small class="text-muted d-block mt-1">{{ activity.created_at.strftime('%Y-%m-%d %H:%M') }}</small> #}
                     </a>
                 {% endfor %}
             </div>
@@ -288,7 +281,6 @@
             </div>
         {% endif %}
     </div>
-    {# Add more sections like favorite genres, recent reviews, posts, etc. as data becomes available #}
   </div>
 </div>
 {% endblock %}

@@ -6,60 +6,53 @@
     <title>{% block title %}My Anime Platform{% endblock %}</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    {# In a real app, you'd use Bootstrap or another CSS framework #}
+    {# Font Awesome for icons - If not already included via CDN or local files in a real app #}
+    {# <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> #}
     <style>
-      /* You can keep some of your existing styles or override Bootstrap defaults here if needed */
-      body { font-family: sans-serif; margin: 0; padding-top: 56px; /* Adjust padding-top to account for fixed navbar */ background-color: #f4f4f4; color: #333; }
-      /* nav { background-color: #333; padding: 10px; margin-bottom: 20px; } */ /* Replaced by Bootstrap navbar */
-      /* nav ul { list-style-type: none; padding: 0; margin: 0; display: flex; align-items: center; } */ /* Replaced by Bootstrap navbar */
-      /* nav ul li { margin-right: 15px; } */ /* Replaced by Bootstrap navbar */
-      /* nav ul li a { color: white; text-decoration: none; } */ /* Replaced by Bootstrap navbar */
-      /* nav ul li a:hover { text-decoration: underline; } */ /* Replaced by Bootstrap navbar */
-      /* .container { background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); } */ /* Using Bootstrap container directly */
-      /* .flash { padding: 10px; margin-bottom: 10px; border-radius: 3px; } */ /* Replaced by Bootstrap alerts */
-      /* .flash.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; } */ /* Replaced by Bootstrap alerts */
-      /* .flash.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; } */ /* Replaced by Bootstrap alerts */
-      label { display: block; margin-bottom: 5px; font-weight: bold; } /* Keep or style with Bootstrap form-label */
-      input[type="text"], input[type="email"], input[type="password"] {
-        /* width: calc(100% - 22px); */ /* Bootstrap form-control handles width */
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-      } /* Will be replaced by form-control, but kept for now if some specific inputs are not updated */
-      input[type="submit"] {
-        /* background-color: #5cb85c; */ /* Bootstrap buttons handle this */
-        /* color: white; */ /* Bootstrap buttons handle this */
-        padding: 10px 15px;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-      } /* Will be replaced by btn, but kept for now if some specific buttons are not updated */
-      /* input[type="submit"]:hover { background-color: #4cae4c; } */ /* Bootstrap buttons handle this */
-      h1, h2 { color: #333; }
+      body { 
+        font-family: 'Roboto', sans-serif; /* From style.css */
+        padding-top: 56px; /* Adjust padding-top to account for fixed navbar */
+        background-color: #eef1f5; /* From style.css */
+      }
+      /* Reducing some default styles that are now in style.css or handled by Bootstrap */
+      label { font-weight: 500; } /* From style.css */
+      
       .nav-notifications .badge, #unread-dm-count { /* Combined badge style */
-        background-color: red; color: white; 
-        border-radius: 50%; padding: 2px 6px; 
-        font-size: 0.7em; vertical-align: top; margin-left: 3px;
+        background-color: #dc3545; /* Bootstrap danger color */
+        color: white; 
+        border-radius: 50%; 
+        padding: .2em .5em; /* Adjusted padding for better look */
+        font-size: 0.65em; /* Consistent with navbar badge sizes */
+        vertical-align: super; /* Aligns badge nicely with text */
+        margin-left: 2px;
       }
       .nav-notifications .badge:empty, #unread-dm-count:empty { display: none; }
+
+      /* Ensure main content area has enough space */
+      main.container {
+          min-height: calc(100vh - 56px - 73px); /* Full viewport height minus navbar and footer height */
+      }
+      footer.bg-light {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+      }
     </style>
     {% block styles %}{% endblock %}
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="{{ url_for('hello') }}">My Anime Platform</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm">
+      <a class="navbar-brand" href="{{ url_for('hello') }}">AnimePlatform</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('hello') }}">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('anime.list_anime') }}">Anime</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('community.home') }}">Community</a></li>
+          <li class="nav-item {% if request.endpoint == 'hello' %}active{% endif %}"><a class="nav-link" href="{{ url_for('hello') }}">Home</a></li>
+          <li class="nav-item {% if request.endpoint.startswith('anime.') %}active{% endif %}"><a class="nav-link" href="{{ url_for('anime.list_anime') }}">Anime</a></li>
+          <li class="nav-item {% if request.endpoint.startswith('community.') %}active{% endif %}"><a class="nav-link" href="{{ url_for('community.home') }}">Community</a></li>
         </ul>
-        <ul class="navbar-nav ml-auto align-items-center"> {# Changed mr-auto on first ul to ml-auto on this one for right alignment, added align-items-center #}
-          <li class="nav-item mr-2"> {# Added margin for spacing #}
+        <ul class="navbar-nav ml-auto align-items-center">
+          <li class="nav-item mr-2">
             <a href="{{ url_for('anime.surprise_me') }}" class="btn btn-outline-warning btn-sm surprise-me-nav-btn d-flex align-items-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-shuffle mr-1" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3h.5a.5.5 0 0 1 0 1H13c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12h.5a.5.5 0 0 1 0 1H13c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
@@ -69,79 +62,82 @@
             </a>
           </li>
         {% if g.user %}
-          <li class="nav-item nav-notifications mx-lg-2">
-            <a class="nav-link" href="{{ url_for('user_activity.notifications_page') }}" style="font-size: 1.1rem;"> {# Slightly larger icon area #}
-              <i class="fas fa-bell"></i> {# Placeholder for Font Awesome icon #}
-              <span class="d-none d-lg-inline">Notifications</span> {# Text for larger screens #}
+          <li class="nav-item nav-notifications mx-lg-2 {% if request.endpoint == 'user_activity.notifications_page' %}active{% endif %}">
+            <a class="nav-link" href="{{ url_for('user_activity.notifications_page') }}" style="font-size: 1.1rem;">
+              {# <i class="fas fa-bell"></i> #} <!-- Assuming Font Awesome is linked -->
+              <span class="d-none d-lg-inline">Notifications</span>
               {% if unread_notification_count > 0 %}
-              <span class="badge badge-pill badge-danger" id="unread-notifications-count" style="font-size: 0.65em; vertical-align: super; margin-left: -2px;">
+              <span class="badge badge-pill badge-danger" id="unread-notifications-count">
                 {{ unread_notification_count }}
               </span>
               {% endif %}
             </a>
           </li>
-          <li class="nav-item mx-lg-1"><a class="nav-link" href="{{ url_for('social.friends_list_page') }}">Friends</a></li>
-          <li class="nav-item mx-lg-1">
+          <li class="nav-item mx-lg-1 {% if request.endpoint == 'social.friends_list_page' %}active{% endif %}"><a class="nav-link" href="{{ url_for('social.friends_list_page') }}">Friends</a></li>
+          <li class="nav-item mx-lg-1 {% if request.endpoint == 'social.messages_home' %}active{% endif %}">
             <a class="nav-link" href="{{ url_for('social.messages_home') }}" style="font-size: 1.1rem;">
-              <i class="fas fa-envelope"></i> {# Placeholder for Font Awesome icon #}
-              <span class="d-none d-lg-inline">Messages</span> {# Text for larger screens #}
+              {# <i class="fas fa-envelope"></i> #} <!-- Assuming Font Awesome is linked -->
+              <span class="d-none d-lg-inline">Messages</span>
               {% if unread_dm_count > 0 %}
-              <span class="badge badge-pill badge-danger" id="unread-dm-count" style="font-size: 0.65em; vertical-align: super; margin-left: -2px;">
+              <span class="badge badge-pill badge-danger" id="unread-dm-count">
                 {{ unread_dm_count }}
               </span>
               {% endif %}
             </a>
           </li>
-          <li class="nav-item dropdown">
+          <li class="nav-item dropdown {% if request.endpoint == 'user.profile' and request.view_args.username == g.user.username %}active{% endif %}">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarUserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <img src="{{ g.user.avatar_url if g.user.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ g.user.username }} avatar" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 8px; object-fit: cover;">
               <span class="d-none d-lg-inline">{{ g.user.username }}</span>
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow-sm" aria-labelledby="navbarUserDropdown">
               <a class="dropdown-item" href="{{ url_for('user.profile', username=g.user.username) }}">
-                <i class="fas fa-user-circle mr-2 text-muted"></i>Profile
+                {# <i class="fas fa-user-circle mr-2 text-muted"></i> #}Profile
               </a>
               <a class="dropdown-item" href="#">
-                <i class="fas fa-cog mr-2 text-muted"></i>Settings
-              </a> {# Placeholder #}
+                {# <i class="fas fa-cog mr-2 text-muted"></i> #}Settings
+              </a>
               <div class="dropdown-divider"></div>
               <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
-                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+                {# <i class="fas fa-sign-out-alt mr-2"></i> #}Log Out
               </a>
             </div>
           </li>
         {% else %}
-          <li class="nav-item mx-lg-1"><a class="nav-link" href="{{ url_for('auth.register') }}">Register</a></li>
-          <li class="nav-item"><a class="nav-link btn btn-primary btn-sm text-white px-3" href="{{ url_for('auth.login') }}">Log In</a></li>
+          <li class="nav-item mx-lg-1 {% if request.endpoint == 'auth.register' %}active{% endif %}"><a class="nav-link" href="{{ url_for('auth.register') }}">Register</a></li>
+          <li class="nav-item {% if request.endpoint == 'auth.login' %}active{% endif %}"><a class="nav-link btn btn-primary btn-sm text-white px-3" href="{{ url_for('auth.login') }}">Log In</a></li>
         {% endif %}
         </ul>
       </div>
     </nav>
-    <main role="main" class="container mt-4"> {# Added mt-4 for spacing below fixed navbar #}
-      <header>
+    <main role="main" class="container mt-4">
+      <header class="mb-4"> {# Moved mb-4 from individual page headers to here for consistency #}
         {% block header %}{% endblock %}
       </header>
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-              {{ message }}
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
+      {# Flash messages container for AJAX and standard Flask flashes #}
+      <div id="flash-message-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+      </div>
       {% block content %}{% endblock %}
     </main>
     <footer class="text-center mt-4 py-3 bg-light">
-        <p>&copy; 2024 My Anime Platform</p>
+        <p class="mb-0">&copy; {{ "now"|strftime("%Y") }} My Anime Platform. All Rights Reserved.</p>
     </footer>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script> {# Ensure main.js is loaded #}
-    {% block scripts %}{% endblock %} {# Allow pages to add their own scripts #}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
   </body>
 </html>

@@ -1,47 +1,50 @@
 /* Global Reset & Typography */
 body {
-  font-family: 'Roboto', sans-serif; /* A more modern sans-serif font */
+  font-family: 'Roboto', sans-serif; 
   margin: 0;
   padding: 0;
-  background-color: #eef1f5; /* Lighter, softer background */
-  color: #333;
+  background-color: #eef1f5; 
+  color: #343a40; /* Slightly darker default text for better contrast */
   line-height: 1.6;
 }
 
-/* Navbar adjustments - Assuming Bootstrap navbar is used from base.html */
-/* The base.html already includes Bootstrap, so specific nav styling here might be redundant if base.html is correctly set up.
-   If navbar issues persist, they should be addressed in base.html's Bootstrap structure or here. */
+/* Navbar adjustments */
 .navbar {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle shadow for depth */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+}
+.navbar-brand {
+    font-weight: 500; /* Make brand slightly bolder */
 }
 
-/* Container - Main content wrapper from base.html */
-/* .container in base.html is fine with Bootstrap's default, but if a max-width is desired for content: */
-/*
+/* Main content container */
 main.container {
-  max-width: 1200px; /* Or your preferred max width */
-  /* background-color: #fff; */ /* Content area background */
-  /* padding: 2rem; */
-  /* margin-top: 1.5rem; */ /* Space from navbar */
-  /* margin-bottom: 1.5rem; */
-  /* border-radius: .3rem; */
-  /* box-shadow: 0 0 15px rgba(0,0,0,0.05); */
-/* }
-*/
+  background-color: #fff; 
+  padding: 2rem; 
+  margin-top: 1.5rem; 
+  margin-bottom: 1.5rem; 
+  border-radius: .3rem; 
+  box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.05); /* Soft shadow for main content area */
+}
+
 
 /* Headings */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 500; /* Slightly bolder headings */
-  color: #2c3e50; /* Darker, sophisticated color for headings */
+  font-weight: 500; 
+  color: #2c3e50; 
 }
 
-/* Buttons - General Bootstrap button styling is good, but can add app-wide consistency */
+/* Buttons */
 .btn {
-  border-radius: .25rem; /* Consistent border-radius */
+  border-radius: .25rem; 
   font-weight: 500;
+  transition: all 0.2s ease-in-out; /* Smooth transitions for buttons */
+}
+.btn:hover {
+    transform: translateY(-1px); /* Subtle lift on hover */
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.1);
 }
 .btn-primary {
-  background-color: #007bff; /* Primary color */
+  background-color: #007bff; 
   border-color: #007bff;
 }
 .btn-primary:hover {
@@ -57,32 +60,48 @@ h1, h2, h3, h4, h5, h6 {
     border-color: #545b62;
 }
 
+/* Links */
+a {
+    color: #007bff;
+    text-decoration: none; /* Remove underline by default */
+}
+a:hover {
+    color: #0056b3;
+    text-decoration: underline; /* Underline on hover for clarity */
+}
 
-/* Forms - Bootstrap form styling is generally good. Customizations can go here if needed. */
+/* Forms */
 .form-control {
-  border-radius: .25rem; /* Consistent border-radius */
+  border-radius: .25rem; 
+  border: 1px solid #ced4da; /* Standard Bootstrap border */
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 .form-control:focus {
-  border-color: #007bff;
+  border-color: #80bdff; /* Lighter blue for focus */
   box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
 }
 label {
-  font-weight: 500; /* Consistent label weight */
+  font-weight: 500; 
   margin-bottom: .5rem;
 }
 
-/* Cards - Bootstrap cards are used extensively */
+/* Cards */
 .card {
-  border: none; /* Remove default card border for a cleaner look if using shadows */
-  /* box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); */ /* Softer shadow, can be default from Bootstrap */
+  border: 1px solid #dee2e6; /* Subtle border for cards */
+  /* box-shadow is often applied with .shadow-sm etc. */
 }
 .card-header {
-  background-color: #f8f9fa; /* Light header for cards */
+  background-color: #f8f9fa; 
   border-bottom: 1px solid #dee2e6;
   font-weight: 500;
 }
 
-/* Flash Messages - Already styled in base.html using Bootstrap alerts */
+/* Flash Messages */
+/* Ensure flash messages have enough contrast and are noticeable */
+#flash-message-container .alert {
+    box-shadow: 0 .25rem .75rem rgba(0,0,0,.1);
+}
+
 
 /* Homepage Specific Styles */
 .hero-section {
@@ -271,9 +290,38 @@ img.rounded-circle.mr-3.avatar-small { /* For profile header */
 }
 
 /* Fix for body padding if navbar-fixed-top is used, and it's not already handled in base.html */
-/* body { padding-top: 56px; } /* Default Bootstrap fixed navbar height */
 /* This was already in base.html <style> tag, so it's good. */
 
 /* Ensure that the .container in base.html doesn't override full-width elements like hero section */
-/* This would require modifying base.html to conditionally apply container, or using a different block for full-width content */
-/* For now, assuming hero section is outside the main content container or base.html structure allows it */
+/* This is handled by `templates/home.html` overriding the header block and placing jumbotron outside main.container */
+
+/* General link styling within cards or specific components */
+.card-link {
+    text-decoration: none;
+}
+.card-link:hover {
+    text-decoration: underline;
+}
+
+/* Table styling improvements if tables are used */
+.table {
+    margin-bottom: 1rem;
+    color: #343a40;
+}
+.table th,
+.table td {
+    padding: .75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 500;
+}
+
+/* Textarea focus glow to match input */
+textarea.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
+}
