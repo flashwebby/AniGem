@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Friend Requests{% endblock %}
+
+{% block header %}
+  <h1>Manage Friend Requests</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+  /* .requests-container { display: flex; gap: 30px; flex-wrap: wrap; } */ /* Replaced by Bootstrap row/col */
+  /* .requests-column { flex: 1; min-width: 300px; } */ /* Replaced by Bootstrap col-md-6 */
+  /* .requests-column h2 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; } */ /* Standard h2 styling, Bootstrap card-header can be used */
+  .request-item { 
+    /* display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 10px; 
+    border: 1px solid #eee; 
+    border-radius: 4px; 
+    margin-bottom: 10px;
+    background-color: #fff; */ /* Replaced by Bootstrap list-group-item */
+  }
+  /* .request-user-info { display: flex; align-items: center; } */ /* Handled by Bootstrap flex utilities */
+  .request-user-info img.avatar-small { width: 40px; height: 40px; /* border-radius: 50%; */ margin-right: 10px; } /* Using rounded-circle */
+  /* .request-actions form { display: inline-block; margin-left: 5px; } */ /* Handled by Bootstrap btn-group or simple spacing */
+</style>
+
+<div class="row requests-container mt-4">
+  <section class="col-md-6 requests-column mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-light">
+        <h2 class="h4 mb-0">Incoming Requests</h2>
+      </div>
+      <div class="card-body p-0">
+        {% if incoming_requests and incoming_requests|selectattr('friend_id', '!=', g.user.id)|list|length > 0 %}
+          <ul class="list-group list-group-flush">
+            {% for req in incoming_requests %}
+              {% if req.friend_id != g.user.id %}
+                <li class="list-group-item d-flex justify-content-between align-items-center request-item">
+                  <div class="request-user-info d-flex align-items-center">
+                    <img src="{{ req.friend_avatar_url if req.friend_avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ req.friend_username }} avatar" class="avatar-small rounded-circle">
+                    <a href="{{ url_for('user.profile', username=req.friend_username) }}" class="ml-2">{{ req.friend_username }}</a>
+                  </div>
+                  <div class="request-actions btn-group">
+                    <form action="{{ url_for('social.accept_request_route', target_user_id=req.friend_id) }}" method="post" class="d-inline">
+                      <button type="submit" class="btn btn-success btn-sm">
+                        {# <i class="fas fa-check mr-1"></i> #} Accept
+                      </button>
+                    </form>
+                    <form action="{{ url_for('social.reject_request_route', target_user_id=req.friend_id) }}" method="post" class="d-inline">
+                      <button type="submit" class="btn btn-danger btn-sm">
+                        {# <i class="fas fa-times mr-1"></i> #} Decline
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted text-center p-3 mb-0">No incoming friend requests.</p>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="col-md-6 requests-column mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-light">
+        <h2 class="h4 mb-0">Sent Requests</h2>
+      </div>
+      <div class="card-body p-0">
+        {% if sent_requests and sent_requests|selectattr('friend_id', '!=', g.user.id)|list|length > 0 %}
+          <ul class="list-group list-group-flush">
+            {% for req in sent_requests %}
+                <li class="list-group-item d-flex justify-content-between align-items-center request-item">
+                  <div class="request-user-info d-flex align-items-center">
+                    <img src="{{ req.friend_avatar_url if req.friend_avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ req.friend_username }} avatar" class="avatar-small rounded-circle">
+                    <span class="ml-2">Waiting for <a href="{{ url_for('user.profile', username=req.friend_username) }}">{{ req.friend_username }}</a></span>
+                  </div>
+                  <div class="request-actions">
+                     <form action="{{ url_for('social.cancel_request_route', target_user_id=req.friend_id) }}" method="post" class="d-inline">
+                       <button type="submit" class="btn btn-warning btn-sm">
+                           {# <i class="fas fa-ban mr-1"></i> #} Cancel Request
+                       </button>
+                     </form>
+                  </div>
+                </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted text-center p-3 mb-0">You haven't sent any friend requests that are still pending.</p>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

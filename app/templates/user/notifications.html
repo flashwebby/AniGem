@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Notifications{% endblock %}
+
+{% block header %}
+  <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+    <h1 class="h2">Notifications</h1>
+    {% if notifications and notifications|selectattr("is_read", "equalto", false)|list|length > 0 %}
+      <form action="{{ url_for('user_activity.read_all_notifications') }}" method="post">
+        <button type="submit" class="btn btn-sm btn-primary">
+            {# <i class="fas fa-check-double mr-1"></i> #} <!-- Placeholder icon -->
+            Mark All as Read
+        </button>
+      </form>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block content %}
+<style>
+  .notification-icon {
+    width: 30px; /* Fixed width for icon container */
+    text-align: center;
+    margin-right: 15px;
+    font-size: 1.2rem; /* Slightly larger icons */
+  }
+  .notification-item.unread .notification-content,
+  .notification-item.unread .notification-content a {
+    font-weight: bold;
+    color: #212529; /* Darker text for unread items */
+  }
+  .notification-item.unread {
+      background-color: #e9f5ff; /* A lighter blue for unread */
+      border-left: 4px solid #007bff;
+  }
+  .notification-timestamp {
+      font-size: 0.8rem;
+  }
+</style>
+
+{% if notifications %}
+  <div class="list-group notifications-list shadow-sm">
+    {% for notification in notifications %}
+      <div class="list-group-item notification-item d-flex align-items-center {% if not notification.is_read %}unread{% endif %}" id="notification-{{ notification.id }}">
+        <div class="notification-icon">
+            {# Placeholder icons based on notification type - requires Font Awesome or similar #}
+            {% if 'friend_request' in notification.type %}
+                <i class="fas fa-user-plus text-info"></i>
+            {% elif 'review' in notification.type and 'upvoted' in notification.content %}
+                <i class="fas fa-thumbs-up text-success"></i>
+            {% elif 'post' in notification.type and 'comment' in notification.content %}
+                <i class="fas fa-comment text-primary"></i>
+            {% elif 'post' in notification.type %}
+                <i class="fas fa-newspaper text-secondary"></i>
+            {% else %}
+                <i class="fas fa-bell text-muted"></i>
+            {% endif %}
+        </div>
+        <div class="notification-details flex-grow-1">
+          <div class="notification-content">
+            {% if notification.link_url %}
+              <a href="{{ notification.link_url }}" class="stretched-link text-decoration-none">{{ notification.content }}</a>
+            {% else %}
+              {{ notification.content }}
+            {% endif %}
+          </div>
+          <small class="notification-timestamp text-muted">
+            {{ notification.created_at.strftime('%b %d, %Y at %I:%M %p') }} 
+            <span class="mx-1">&bull;</span> 
+            Type: {{ notification.type.replace('_', ' ')|title }}
+          </small>
+        </div>
+        <div class="notification-actions ml-2">
+          {% if not notification.is_read %}
+            <form action="{{ url_for('user_activity.read_notification', notification_id=notification.id) }}" method="post" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-light" title="Mark as Read">
+                  <i class="fas fa-check"></i> {# Placeholder icon #}
+              </button>
+            </form>
+          {% else %}
+            <span class="badge badge-light p-2" style="font-size: 0.9em;">Read</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-secondary text-center mt-4" role="alert">
+    <i class="fas fa-bell-slash fa-2x mb-2"></i><br> <!-- Placeholder icon -->
+    You have no notifications at the moment.
+  </div>
+{% endif %}
+
+{# Potential AJAX script for marking as read without page reload could go here or in main.js #}
+{% endblock %}

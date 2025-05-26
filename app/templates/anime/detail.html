@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ anime.title }}{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <style>
+    .anime-cover-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: .3rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .anime-title-main {
+      font-size: 2.5rem; /* Larger title */
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+    }
+    .anime-meta-info p {
+      font-size: 1rem;
+      margin-bottom: .5rem;
+    }
+    .anime-meta-info strong {
+      color: #495057; /* Darker strong text */
+    }
+    .section-divider {
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      border-top: 1px solid #e9ecef;
+    }
+    .rating-form .star-rating label {
+      font-size: 2.2em; /* Slightly larger stars */
+      color: #ced4da; /* Lighter default star color */
+    }
+    .rating-form .star-rating input[type="radio"]:checked ~ label,
+    .rating-form .star-rating label:hover,
+    .rating-form .star-rating label:hover ~ label {
+      color: #ffc107; /* Bootstrap warning color for stars */
+    }
+    .review-item {
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: .25rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+    .review-author img {
+        width: 40px;
+        height: 40px;
+    }
+     .review-content .spoiler-text.hidden-spoiler {
+        background-color: #343a40; color: #343a40; /* Darker for better hiding */
+        padding: .5rem; border-radius: .25rem; 
+        cursor: pointer; user-select: none;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .review-content .spoiler-text.hidden-spoiler:hover {
+        background-color: #495057;
+        color: #495057;
+    }
+    .review-content .spoiler-text.revealed {
+        background-color: transparent;
+        color: inherit;
+    }
+  </style>
+
+  <div class="container mt-4">
+    {# General Flash Message Container #}
+    <div id="flash-message-container" class="mb-3"></div>
+
+    <div class="row">
+      <div class="col-md-4 text-center text-md-left">
+        <img src="{{ anime.cover_image_url if anime.cover_image_url else url_for('static', filename='images/default_cover.png') }}" 
+             alt="Cover image for {{ anime.title }}" class="anime-cover-img mb-3 mb-md-0">
+      </div>
+      <div class="col-md-8 anime-info">
+        <h1 class="anime-title-main">{{ anime.title }}</h1>
+        <div class="anime-meta-info">
+            <p><strong>Release Year:</strong> {{ anime.release_year if anime.release_year else 'N/A' }}</p>
+            <p><strong>Language:</strong> {{ anime.language if anime.language else 'N/A' }}</p>
+            <p><strong>Average Rating:</strong> 
+            <span id="average-rating" class="badge badge-warning p-2" style="font-size: 1rem;">
+                {{ "%.1f"|format(anime.average_rating) if anime.average_rating else 'Not Rated' }} / 10
+            </span>
+            </p>
+            <div class="mb-2">
+                <strong>Genres:</strong>
+                {% if anime.genres %}
+                    {% for genre in anime.genres %}
+                    <a href="{{ url_for('anime.list_anime', genre_id=genre.id) }}"><span class="badge badge-info mr-1">{{ genre.name }}</span></a>
+                    {% endfor %}
+                {% else %}
+                    <span class="badge badge-secondary">N/A</span>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <strong>Tags:</strong>
+                {% if anime.tags %}
+                    {% for tag in anime.tags %}
+                    <a href="{{ url_for('anime.list_anime', tag_id=tag.id) }}"><span class="badge badge-light mr-1">{{ tag.name }}</span></a>
+                    {% endfor %}
+                {% else %}
+                    <span class="badge badge-secondary">N/A</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if anime.description %}
+          <div class="description card card-body bg-light p-3 mb-3">
+            <h5 class="card-title">Synopsis</h5>
+            <p class="card-text">{{ anime.description }}</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h4 class="card-title">Rate this Anime</h4>
+            {% if g.user %}
+              <form id="rating-form" action="{{ url_for('ratings_reviews.rate_anime', anime_id=anime.id) }}" method="post" class="rating-form text-center">
+                <div class="star-rating mb-2">
+                  {% for i in range(10, 0, -1) %}
+                    <input type="radio" id="star{{i}}" name="score" value="{{i}}" 
+                           {% if current_user_rating and current_user_rating.score == i %}checked{% endif %}
+                           data-current-rating="{{ current_user_rating.score if current_user_rating else '' }}">
+                    <label for="star{{i}}" title="{{i}} stars">&#9733;</label>
+                  {% endfor %}
+                </div>
+                 <button type="submit" class="btn btn-primary btn-block">Submit Rating</button> 
+              </form>
+              <div id="user-current-rating" class="text-center mt-2">
+                {% if current_user_rating %}
+                  <p>Your current rating: {{ current_user_rating.score }}/10</p>
+                {% else %}
+                  <p class="text-muted">You have not rated this anime yet.</p>
+                {% endif %}
+              </div>
+            {% else %}
+              <p class="text-center"><a href="{{ url_for('auth.login', next=request.url) }}" class="btn btn-outline-primary">Log in to rate this anime</a></p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h4 class="card-title">Submit a Review</h4>
+            {% if g.user %}
+              <form id="review-form" action="{{ url_for('ratings_reviews.review_anime', anime_id=anime.id) }}" method="post" class="review-form">
+                <div class="form-group">
+                  <label for="review-text-content" class="sr-only">Your Review:</label>
+                  <textarea name="text_content" id="review-text-content" class="form-control" rows="3" placeholder="Write your review..." required></textarea>
+                </div>
+                <div class="form-group form-check">
+                  <input type="checkbox" name="is_spoiler" id="review-is-spoiler" class="form-check-input">
+                  <label for="review-is-spoiler" class="form-check-label">This review contains spoilers</label>
+                </div>
+                <button type="submit" class="btn btn-success btn-block">Post Review</button>
+              </form>
+            {% else %}
+              <p class="text-center"><a href="{{ url_for('auth.login', next=request.url) }}" class="btn btn-outline-success">Log in to post a review</a></p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section-divider"></div>
+
+    <h3 class="mb-3">User Reviews</h3>
+    <div id="review-list-container">
+        {% if reviews %}
+            {% for review in reviews %}
+            <div class="review-item card mb-3" id="review-{{ review.id }}">
+                <div class="card-body">
+                <div class="review-author d-flex align-items-center mb-2">
+                <img src="{{ review.user.avatar_url if review.user.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ review.user.username }} avatar" class="rounded-circle mr-2 avatar-small">
+                <div>
+                    <strong>{{ review.user.username }}</strong>
+                    {% if review.rating_score %}
+                        <span class="review-rating-score text-warning ml-1">rated this {{ review.rating_score }}/10</span>
+                    {% endif %}
+                    <small class="review-timestamp text-muted d-block">{{ review.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                </div>
+                <div class="review-content">
+                {% if review.is_spoiler %}
+                    <div class="spoiler-text hidden-spoiler mb-2">
+                    <p>{{ review.text_content }}</p>
+                    </div>
+                    <button class="reveal-spoiler-btn btn btn-sm btn-outline-secondary mb-2">Reveal Spoiler</button>
+                {% else %}
+                    <p class="card-text">{{ review.text_content }}</p>
+                {% endif %}
+                </div>
+                <div class="review-actions text-right">
+                <form class="d-inline vote-form" data-review-id="{{ review.id }}" data-vote-type="upvote">
+                    <button type="submit" class="btn btn-outline-success btn-sm vote-btn upvote {% if user_votes and user_votes[review.id] == 'upvote' %}active{% endif %}">
+                        &#x1F44D; <span class="upvote-count">{{ review.upvotes }}</span>
+                    </button>
+                </form>
+                <form class="d-inline ml-1 vote-form" data-review-id="{{ review.id }}" data-vote-type="downvote">
+                    <button type="submit" class="btn btn-outline-danger btn-sm vote-btn downvote {% if user_votes and user_votes[review.id] == 'downvote' %}active{% endif %}">
+                        &#x1F44E; <span class="downvote-count">{{ review.downvotes }}</span>
+                    </button>
+                </form>
+                </div>
+            </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div id="no-reviews-message" class="alert alert-info" role="alert">
+            No reviews yet for this anime. Be the first to write one!
+        </div>
+        {% endif %}
+    </div> {# End review-list-container #}
+
+    {# Simple Pagination Placeholder for Reviews - to be made dynamic if time permits #}
+    {% if reviews and reviews|length > 5 %} {# Example: Show pagination if more than 5 reviews #}
+    <nav aria-label="Review navigation" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li> {# Placeholder #}
+        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+      </ul>
+    </nav>
+    {% endif %}
+
+    <div class="mt-4 text-center">
+      <a href="{{ url_for('anime.list_anime') }}" class="btn btn-secondary">&laquo; Back to Anime List</a>
+    </div>
+  </div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  .review-author .avatar-small { width: 30px; height: 30px; }
+  .review-rating-score { font-weight: bold; }
+  .vote-btn span { margin-left: 3px; }
+</style>
+{% endblock %}

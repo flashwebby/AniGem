@@ -1,0 +1,80 @@
+{# Macro or include for rendering a comment and its replies recursively #}
+{% macro render_comment(comment, post_id) %}
+  <div class="media mt-3 comment-item" id="comment-{{ comment.id }}"> {# Using media object for comment layout #}
+    <img src="{{ comment.user.avatar_url if comment.user.avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ comment.user.username }} avatar" class="mr-3 avatar-small rounded-circle">
+    <div class="media-body">
+      <h5 class="mt-0 comment-author">
+        {{ comment.user.username }}
+        <small class="text-muted comment-meta"> - {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+      </h5>
+      <div class="comment-content">
+        <p>{{ comment.text_content }}</p>
+      </div>
+      <div class="comment-actions">
+        {% if g.user %}
+        <a href="#" class="reply-link btn btn-sm btn-link" data-comment-id="{{ comment.id }}" data-username="{{ comment.user.username }}" data-form-target="reply-form-{{ comment.id }}">Reply</a>
+        <form action="{{ url_for('community.comment_on_post', post_id=post_id) }}" method="post" class="reply-form mt-2" id="reply-form-{{ comment.id }}" style="display: none;">
+            <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
+            <div class="form-group">
+              <label for="text_content_{{ comment.id }}">Reply to {{ comment.user.username }}:</label>
+              <textarea name="text_content" id="text_content_{{ comment.id }}" class="form-control form-control-sm" rows="2" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-secondary btn-sm">Post Reply</button>
+          </form>
+        {% endif %}
+      </div>
+
+      {% if comment.replies %}
+        <div class="replies mt-3"> {# Using a div for replies, can be styled further #}
+          {% for reply in comment.replies %}
+            {{ render_comment(reply, post_id) }} {# Recursive call #}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endmacro %}
+
+{# Main entry point when including this partial #}
+<div class="comment-thread list-group"> {# Using list-group for overall comment thread styling #}
+  {% for comment in comments %} {# Assumes 'comments' is the list of top-level comments #}
+    {# Each top-level comment can be a list-group-item or a card #}
+    <div class="list-group-item list-group-item-light p-0 border-0"> {# Removed padding from list-group-item to use media object's spacing #}
+      {{ render_comment(comment, post.id) }} {# post.id needs to be available in context #}
+    </div>
+  {% endfor %}
+</div>
+
+<style>
+/* Styles specific to comments, can be moved to a main CSS file or kept here if scoped */
+/* .comment-thread { list-style: none; padding-left: 0; } */ /* Handled by list-group */
+.comment-thread .replies { 
+  /* padding-left: 20px; */ /* Bootstrap media object handles nesting well */
+  /* border-left: 2px solid #eee; */ /* Optional: Add border with Bootstrap classes if needed */
+  /* margin-left: 10px; */ /* Spacing handled by media object structure */
+}
+.comment-item { 
+  /* background-color: #f9f9f9; */ /* list-group-item-light provides a background */
+  /* border: 1px solid #eee; */ /* list-group-item provides border */
+  /* border-radius: 4px; */ /* list-group-item provides border-radius */
+  /* padding: 10px; */ /* list-group-item provides padding, but we override to 0 for media object */
+  /* margin-top: 10px; */ /* list-group items have some margin, or use Bootstrap spacing utilities */
+}
+.comment-author { font-weight: 500; /* Bootstrap default is often fine */ margin-bottom: .25rem; /* Spacing for meta text */ display: flex; align-items: center;}
+.comment-author .avatar-small { width: 32px; height: 32px; /* Bootstrap standard avatar size can be used */ }
+.comment-meta { font-size: 0.8em; /* color: #888; */ /* text-muted handles color */ margin-left: 0.25rem;}
+.comment-content { margin-bottom: .5rem; font-size: 0.95em; }
+.comment-actions { margin-top: .25rem; }
+/* .reply-link { font-size: 0.9em; color: #337ab7; cursor: pointer; text-decoration: none; } */ /* Replaced with btn btn-sm btn-link */
+/* .reply-link:hover { text-decoration: underline; } */ /* Handled by Bootstrap */
+.reply-form { 
+    /* margin-left: 0; */ /* Bootstrap structure */
+    margin-top: .5rem; 
+    /* padding:10px;  */ /* Can use Bootstrap padding utilities if more is needed */
+    /* background-color:#f0f0f0; */ /* Can use bg-light or similar */
+    /* border-radius:4px; */ /* Bootstrap form-control has radius */
+}
+/* .reply-form textarea { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 3px; box-sizing: border-box; font-size:0.9em; } */ /* Handled by form-control form-control-sm */
+/* .reply-form input[type="submit"] { background-color: #6c757d; color: white; padding: 6px 12px; border:none; border-radius:3px; cursor:pointer; font-size:0.9em; } */ /* Replaced by btn btn-secondary btn-sm */
+/* .reply-form input[type="submit"]:hover { background-color: #5a6268; } */ /* Handled by Bootstrap */
+</style>

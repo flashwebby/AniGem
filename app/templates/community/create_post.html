@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if target_subcommunity %}
+    Create Post in r/{{ target_subcommunity.name }}
+  {% else %}
+    Create New Post
+  {% endif %}
+{% endblock %}
+
+{% block header %}
+  {# Header is handled within the content block for this page structure #}
+{% endblock %}
+
+{% block content %}
+<style>
+  .create-post-card {
+    max-width: 800px; /* Limit width for better readability on large screens */
+    margin: 2rem auto; /* Center the card */
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="card shadow-sm create-post-card">
+    <div class="card-header bg-light">
+      <h1 class="h3 mb-0">
+        {% if target_subcommunity %}
+          Create Post in r/{{ target_subcommunity.name }}
+        {% else %}
+          Create New Post
+        {% endif %}
+      </h1>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" name="title" id="title" class="form-control form-control-lg" value="{{ request.form['title'] }}" placeholder="Enter a descriptive title" required>
+          <small class="form-text text-muted">Keep it concise and engaging.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="content">Content</label>
+          <textarea name="content" id="content" class="form-control" rows="8" placeholder="Share your thoughts, theories, or memes here..." required>{{ request.form['content'] }}</textarea>
+          <small class="form-text text-muted">Markdown is supported for formatting (e.g., **bold**, *italic*, [link](url)).</small>
+        </div>
+
+        {% if not target_subcommunity %}
+        <div class="form-group">
+          <label for="subcommunity_id">Subcommunity (Optional)</label>
+          <select name="subcommunity_id" id="subcommunity_id" class="form-control custom-select">
+            <option value="">General Discussion / No Specific Subcommunity</option>
+            {% for sub in subcommunities %}
+              <option value="{{ sub.id }}" {% if request.form['subcommunity_id']|int == sub.id %}selected{% endif %}>
+                r/{{ sub.name }}
+              </option>
+            {% endfor %}
+          </select>
+          <small class="form-text text-muted">Choose the most relevant community for your post. If unsure, leave as "General".</small>
+        </div>
+        {% else %}
+          {# If target_subcommunity is defined, we are posting to it directly #}
+          {# No need to show a selector, subcommunity_id is passed via URL in create_post route #}
+           <input type="hidden" name="subcommunity_id" value="{{ target_subcommunity.id }}">
+        {% endif %}
+
+        <div class="form-group">
+          <label for="post_type">Post Type</label>
+          <select name="post_type" id="post_type" class="form-control custom-select">
+            <option value="discussion" {% if request.form['post_type'] == 'discussion' %}selected{% endif %}>Discussion</option>
+            <option value="meme" {% if request.form['post_type'] == 'meme' %}selected{% endif %}>Meme</option>
+            <option value="theory" {% if request.form['post_type'] == 'theory' %}selected{% endif %}>Theory</option>
+            <option value="question" {% if request.form['post_type'] == 'question' %}selected{% endif %}>Question</option>
+            <option value="news" {% if request.form['post_type'] == 'news' %}selected{% endif %}>News</option>
+            {# Add other post types as needed from schema #}
+          </select>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-end">
+            <a href="{{ url_for('community.home') }}" class="btn btn-outline-secondary mr-2">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                {# <i class="fas fa-paper-plane mr-1"></i> #} <!-- Placeholder icon -->
+                Submit Post
+            </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Community Hub{% endblock %}
+
+{% block header %}
+  {# Header will be part of the main content for a full-width jumbotron #}
+{% endblock %}
+
+{% block content %}
+<style>
+  .community-jumbotron {
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('{{ url_for('static', filename='images/community_banner.jpg') }}') no-repeat center center;
+    background-size: cover;
+    color: #fff;
+    padding: 4rem 2rem;
+    border-radius: 0; /* Full width */
+    margin-bottom: 2rem;
+  }
+  .community-jumbotron h1 {
+    font-weight: 300;
+    font-size: 3.5rem;
+  }
+  .community-jumbotron .lead {
+    font-size: 1.25rem;
+  }
+  .section-heading {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+  .subcommunity-card .card-title a {
+    color: #007bff; /* Primary link color */
+  }
+  .subcommunity-card .card-title a:hover {
+    text-decoration: underline;
+  }
+  .post-summary-card .card-title a {
+    color: #343a40; /* Darker for post titles */
+  }
+  .post-summary-card .card-title a:hover {
+    color: #0056b3;
+    text-decoration: none;
+  }
+  .post-meta { font-size: 0.85em; color: #6c757d; }
+  .post-meta a { color: #6c757d; }
+  .post-meta a:hover { text-decoration: underline; }
+  .placeholder-card {
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da;
+    height: 150px; /* Adjust as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #6c757d;
+  }
+</style>
+
+<div class="jumbotron community-jumbotron text-center">
+  <div class="container">
+    <h1 class="display-4">Welcome to the Community Hub!</h1>
+    <p class="lead">Connect with fellow anime enthusiasts, share your thoughts, and discover new perspectives.</p>
+    <p>
+      <a href="{{ url_for('community.create_subcommunity') }}" class="btn btn-lg btn-info my-2 mr-2 shadow-sm">Create a Subcommunity</a>
+      <a href="{{ url_for('community.create_post') }}" class="btn btn-lg btn-primary my-2 shadow-sm">Start a Discussion</a>
+    </p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <section id="recent-posts">
+        <h2 class="section-heading">Recent Discussions</h2>
+        {% if recent_posts %}
+          {% for post in recent_posts %}
+            <div class="card mb-3 shadow-sm post-summary-card">
+              <div class="card-body">
+                <h5 class="card-title"><a href="{{ url_for('community.post_detail', post_id=post.id) }}">{{ post.title }}</a></h5>
+                <p class="card-text post-meta">
+                  Posted by <a href="{{ url_for('user.profile', username=post.user.username) }}">{{ post.user.username }}</a>
+                  {% if post.subcommunity %}
+                    in <a href="{{ url_for('community.subcommunity_detail', subcommunity_identifier=post.subcommunity.id) }}">r/{{ post.subcommunity.name }}</a>
+                  {% endif %}
+                  - <small>{{ post.created_at.strftime('%b %d, %Y') }}</small>
+                </p>
+                <p class="card-text post-meta">
+                  <span class="text-success mr-2">{{ post.upvotes }} Upvotes</span>
+                  <span class="text-danger mr-2">{{ post.downvotes }} Downvotes</span>
+                  <span class="text-info">{{ post.comment_count }} Comments</span>
+                </p>
+                {# Consider adding a snippet of post.content here if available and desired #}
+                <a href="{{ url_for('community.post_detail', post_id=post.id) }}" class="btn btn-outline-secondary btn-sm mt-2">Read More &raquo;</a>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="alert alert-light" role="alert">
+            No posts yet. <a href="{{ url_for('community.create_post') }}" class="alert-link">Be the first to post!</a>
+          </div>
+        {% endif %}
+      </section>
+
+      <section id="featured-discussions" class="mt-4">
+        <h2 class="section-heading">Featured Discussions</h2>
+        <div class="card placeholder-card">
+            <p class="m-0">Featured discussions coming soon!</p>
+        </div>
+      </section>
+    </div>
+
+    <aside class="col-lg-4">
+      <section id="subcommunities-list">
+        <h2 class="section-heading">Explore Subcommunities</h2>
+        {% if subcommunities %}
+          <div class="list-group shadow-sm">
+            {% for sub in subcommunities %}
+              <a href="{{ url_for('community.subcommunity_detail', subcommunity_identifier=sub.id) }}" class="list-group-item list-group-item-action subcommunity-card">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1 card-title">{{ sub.name }}</h5>
+                  <small class="text-muted">{{ sub.post_count if sub.post_count is defined else 0 }} posts</small>
+                </div>
+                <p class="mb-1 small text-muted">{{ sub.description|truncate(80) if sub.description else 'No description available.' }}</p>
+                <small class="text-muted">Created by: {{ sub.creator_username }}</small>
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="alert alert-light" role="alert">
+            No subcommunities yet. Why not <a href="{{ url_for('community.create_subcommunity') }}" class="alert-link">create one</a>?
+          </div>
+        {% endif %}
+      </section>
+
+      <section id="community-polls" class="mt-4">
+        <h2 class="section-heading">Community Polls</h2>
+        <div class="card placeholder-card">
+            <p class="m-0">Community Poll: Best Opening Theme? (Placeholder)</p>
+        </div>
+      </section>
+
+      <section id="upcoming-events" class="mt-4">
+        <h2 class="section-heading">Upcoming Events</h2>
+        <div class="card placeholder-card">
+            <p class="m-0">Watch Party: Classic Movie Night (Placeholder)</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}My Messages{% endblock %}
+
+{% block header %}
+<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+  <h1 class="h2">Direct Messages</h1>
+  <a href="{{ url_for('social.user_search') }}" class="btn btn-primary">
+    {# <i class="fas fa-plus mr-1"></i> #} <!-- Placeholder icon -->
+    Start New Conversation
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+  .conversation-item.unread-conversation { 
+      font-weight: bold; 
+      background-color: #e9f5ff; /* Lighter blue for unread items */
+      border-left: 4px solid #007bff;
+  }
+  .conversation-avatar img { 
+      width: 55px; 
+      height: 55px; 
+      object-fit: cover;
+  }
+  .conversation-summary .username { 
+      font-size: 1.05rem; 
+      color: #343a40;
+      font-weight: 500;
+  }
+  .conversation-summary .last-message { 
+      font-size: 0.9rem; 
+      color: #6c757d; /* Bootstrap text-muted */
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      max-width: 90%; /* Ensure it doesn't overflow too much */
+  }
+  .conversation-meta .timestamp { 
+      font-size: 0.8rem; 
+      color: #6c757d;
+  }
+  .conversation-meta .unread-badge { 
+    font-size: 0.8em; 
+    padding: .4em .6em; /* Slightly larger badge */
+  }
+  .list-group-item-action:hover {
+      background-color: #f8f9fa; /* Standard hover color */
+  }
+</style>
+
+{% if conversations %}
+  <div class="list-group conversations-list shadow-sm">
+    {% for convo in conversations %}
+      <a href="{{ url_for('social.conversation_detail', other_user_id=convo.other_user_id) }}" 
+         class="list-group-item list-group-item-action conversation-item p-3 {% if convo.unread_count > 0 %}unread-conversation{% endif %}">
+        <div class="d-flex w-100 align-items-center">
+          <div class="conversation-avatar mr-3">
+            <img src="{{ convo.other_user_avatar_url if convo.other_user_avatar_url else url_for('static', filename='images/default_avatar.png') }}" alt="{{ convo.other_user_username }} avatar" class="rounded-circle">
+          </div>
+          <div class="conversation-summary flex-grow-1">
+            <div class="d-flex justify-content-between">
+                <h6 class="mb-1 username">{{ convo.other_user_username }}</h6>
+                <small class="timestamp text-muted">{{ convo.last_message_sent_at.strftime('%b %d, %H:%M') if convo.last_message_sent_at else '' }}</small>
+            </div>
+            <p class="mb-1 last-message">
+                {% if convo.unread_count > 0 %}<strong class="text-primary">{% endif %}
+                {{ convo.last_message_content|truncate(45) if convo.last_message_content else 'No messages yet.' }}
+                {% if convo.unread_count > 0 %}</strong>{% endif %}
+            </p>
+          </div>
+          {% if convo.unread_count > 0 %}
+            <span class="badge badge-primary badge-pill ml-3 unread-badge">{{ convo.unread_count }}</span>
+          {% endif %}
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-secondary text-center mt-4" role="alert">
+    <i class="fas fa-comments fa-2x mb-2"></i><br> <!-- Placeholder icon -->
+    You have no active conversations. 
+    <a href="{{ url_for('social.user_search') }}" class="alert-link">Find users</a> to start chatting with.
+  </div>
+{% endif %}
+{% endblock %}
